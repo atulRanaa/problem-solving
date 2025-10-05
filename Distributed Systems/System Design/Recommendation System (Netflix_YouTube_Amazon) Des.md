@@ -815,6 +815,9 @@ graph TB
 
 ### 7.1 Collaborative Filtering (Matrix Factorization)
 
+<details>
+<summary>Rating Struct</summary>
+
 ```cpp
 #include <vector>
 #include <unordered_map>
@@ -996,8 +999,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 7.2 Content-Based Filtering
+
+<details>
+<summary>Item Struct</summary>
 
 ```cpp
 struct Item {
@@ -1112,8 +1120,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 7.3 Hybrid Recommender System
+
+<details>
+<summary>RecommendationResult Struct</summary>
 
 ```cpp
 struct RecommendationResult {
@@ -1251,8 +1264,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 7.4 Complete Recommendation System
+
+<details>
+<summary>RecommendationSystem Class</summary>
 
 ```cpp
 class RecommendationSystem {
@@ -1360,6 +1378,8 @@ int main() {
 }
 ```
 
+</details>
+
 
 ***
 
@@ -1392,6 +1412,9 @@ Implementation:
 
 **Solution: Multi-Armed Bandit**
 
+<details>
+<summary>EpsilonGreedy Class</summary>
+
 ```cpp
 class EpsilonGreedy {
 private:
@@ -1415,6 +1438,8 @@ public:
 
 // Result: Learn user preferences in 5-10 interactions
 ```
+
+</details>
 
 
 ### Bottleneck 3: Model Staleness

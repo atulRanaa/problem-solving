@@ -527,6 +527,9 @@ compensate():
 
 ### 6.1 Two-Phase Commit Implementation
 
+<details>
+<summary>Transaction Struct</summary>
+
 ```cpp
 #include <iostream>
 #include <vector>
@@ -882,8 +885,13 @@ int main() {
 }
 ```
 
+</details>
+
 
 ### 6.2 Saga Pattern Implementation (Orchestration)
+
+<details>
+<summary>SagaStep Struct</summary>
 
 ```cpp
 #include <functional>
@@ -1157,8 +1165,13 @@ int main() {
 }
 ```
 
+</details>
+
 
 ### 6.3 Saga Pattern - Choreography (Event-Driven)
+
+<details>
+<summary>class Enum</summary>
 
 ```cpp
 #include <queue>
@@ -1333,6 +1346,8 @@ void runChoreographySaga() {
 }
 ```
 
+</details>
+
 
 ***
 
@@ -1358,6 +1373,9 @@ Problem: Saga 2 saw intermediate state of Saga 1
 
 **1. Semantic Lock**
 
+<details>
+<summary>SemanticLock Struct</summary>
+
 ```cpp
 struct SemanticLock {
     std::string resource_id;
@@ -1375,7 +1393,12 @@ bool canRead(const std::string& resource_id) {
 }
 ```
 
+</details>
+
 **2. Commutative Updates**
+
+<details>
+<summary>C++ Code</summary>
 
 ```cpp
 // Instead of: SET balance = 90
@@ -1388,7 +1411,12 @@ bool canRead(const std::string& resource_id) {
 // Final: -10 - 50 + 10 = -50 (correct)
 ```
 
+</details>
+
 **3. Pessimistic View**
+
+<details>
+<summary>ResourceVersion Struct</summary>
 
 ```cpp
 // Mark resources as "tentative" during saga
@@ -1401,7 +1429,12 @@ struct ResourceVersion {
 // Writers see committed + tentative
 ```
 
+</details>
+
 **4. Reread Value**
+
+<details>
+<summary>C++ Code</summary>
 
 ```cpp
 // Before committing, reread to ensure nothing changed
@@ -1422,10 +1455,15 @@ bool commitWithValidation() {
 }
 ```
 
+</details>
+
 
 ### 7.2 Saga Execution Guarantees
 
 **At-Least-Once Execution:**
+
+<details>
+<summary>SagaStepWithRetry Class</summary>
 
 ```cpp
 class SagaStepWithRetry {
@@ -1455,7 +1493,12 @@ class SagaStepWithRetry {
 //   - createOrder(order_id, data) - use INSERT ... ON CONFLICT DO NOTHING
 ```
 
+</details>
+
 **Idempotency Pattern:**
+
+<details>
+<summary>IdempotentService Class</summary>
 
 ```cpp
 class IdempotentService {
@@ -1481,10 +1524,15 @@ public:
 };
 ```
 
+</details>
+
 
 ### 7.3 Saga Recovery Patterns
 
 **Forward Recovery (Retry Until Success):**
+
+<details>
+<summary>ForwardRecoverySaga Class</summary>
 
 ```cpp
 class ForwardRecoverySaga {
@@ -1513,14 +1561,24 @@ class ForwardRecoverySaga {
 };
 ```
 
+</details>
+
 **Backward Recovery (Compensate on Failure):**
+
+<details>
+<summary>C++ Code</summary>
 
 ```cpp
 // Already shown in previous implementation
 // Key: Must be prepared to compensate at any point
 ```
 
+</details>
+
 **Mixed Strategy:**
+
+<details>
+<summary>HybridRecoverySaga Class</summary>
 
 ```cpp
 class HybridRecoverySaga {
@@ -1544,6 +1602,8 @@ class HybridRecoverySaga {
     }
 };
 ```
+
+</details>
 
 
 ***
@@ -1590,6 +1650,9 @@ Hotel + Flight Booking: Saga
 
 
 ### 8.2 Monitoring \& Observability
+
+<details>
+<summary>SagaMonitor Class</summary>
 
 ```cpp
 class SagaMonitor {
@@ -1644,8 +1707,13 @@ public:
 };
 ```
 
+</details>
+
 
 ### 8.3 Saga State Persistence
+
+<details>
+<summary>SagaStatePersistence Class</summary>
 
 ```cpp
 class SagaStatePersistence {
@@ -1698,6 +1766,8 @@ public:
     }
 };
 ```
+
+</details>
 
 
 ***

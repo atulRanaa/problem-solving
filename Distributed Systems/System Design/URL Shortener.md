@@ -246,6 +246,9 @@ Alternative: Range-based sharding by ID
 
 **Option 1: Base62 Encoding of Auto-increment ID**[^1][^2][^3]
 
+<details>
+<summary>Base62Encoder Class</summary>
+
 ```cpp
 class Base62Encoder {
 private:
@@ -286,6 +289,8 @@ uint64_t id = 123456789;
 std::string short_code = Base62Encoder::encode(id);  // "8M0kX"
 ```
 
+</details>
+
 **Pros:** Simple, guaranteed unique, predictable length
 **Cons:** Sequential (security concern), single point of failure for ID generation
 
@@ -302,6 +307,9 @@ std::string short_code = Base62Encoder::encode(id);  // "8M0kX"
 - Machine ID: 1024 unique machines
 - Sequence: 4096 IDs per millisecond per machine
 ```
+
+<details>
+<summary>SnowflakeIDGenerator Class</summary>
 
 ```cpp
 class SnowflakeIDGenerator {
@@ -354,7 +362,12 @@ public:
 };
 ```
 
+</details>
+
 **Recommended: Range Allocation + Base62**
+
+<details>
+<summary>RangeBasedIDGenerator Class</summary>
 
 ```cpp
 // Central ID allocator assigns ranges to each service
@@ -397,7 +410,12 @@ public:
 };
 ```
 
+</details>
+
 **Collision Handling for Custom Aliases:**
+
+<details>
+<summary>C++ Code</summary>
 
 ```cpp
 std::string createShortURL(const std::string& long_url, 
@@ -430,6 +448,8 @@ std::string createShortURL(const std::string& long_url,
     return "https://tinyurl.com/" + short_code;
 }
 ```
+
+</details>
 
 
 ### Step 7: Bottlenecks \& Optimizations

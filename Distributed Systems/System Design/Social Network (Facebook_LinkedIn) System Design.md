@@ -1119,6 +1119,9 @@ graph TB
 
 ### 7.1 Connection Service (Friend Graph)
 
+<details>
+<summary>Connection Struct</summary>
+
 ```cpp
 #include <string>
 #include <vector>
@@ -1442,8 +1445,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 7.2 Feed Generation Service
+
+<details>
+<summary>Post Struct</summary>
 
 ```cpp
 struct Post {
@@ -1666,8 +1674,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 7.3 ML-Based Feed Ranking
+
+<details>
+<summary>MLRankingService Class</summary>
 
 ```cpp
 class MLRankingService {
@@ -1768,8 +1781,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 7.4 Notification Service
+
+<details>
+<summary>NotificationService Class</summary>
 
 ```cpp
 class NotificationService {
@@ -1895,8 +1913,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 7.5 Complete Social Network System
+
+<details>
+<summary>SocialNetwork Class</summary>
 
 ```cpp
 class SocialNetwork {
@@ -1992,6 +2015,8 @@ int main() {
 }
 ```
 
+</details>
+
 
 ***
 
@@ -2002,6 +2027,9 @@ int main() {
 **Problem:** Generating feed for user with 5,000 friends = query 5,000 users' posts
 
 **Solution: Hybrid Fan-Out**
+
+<details>
+<summary>OptimizedFeedService Class</summary>
 
 ```cpp
 class OptimizedFeedService {
@@ -2028,6 +2056,8 @@ private:
 // Normal feed: <100ms (cached)
 // Celebrity mixed: <300ms (partial cache)
 ```
+
+</details>
 
 
 ### Bottleneck 2: Graph Query Performance
@@ -2061,6 +2091,9 @@ Cross-shard query: 50ms (rare)
 
 **Solution: Batch \& Aggregate**
 
+<details>
+<summary>BatchedNotificationService Class</summary>
+
 ```cpp
 class BatchedNotificationService {
 public:
@@ -2091,6 +2124,8 @@ public:
 
 // Result: 1M individual notifs → 1 aggregated notif
 ```
+
+</details>
 
 
 ***

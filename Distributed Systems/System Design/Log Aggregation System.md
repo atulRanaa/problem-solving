@@ -620,6 +620,9 @@ graph TB
 
 ### 7.1 Log Entry Structure
 
+<details>
+<summary>class Enum</summary>
+
 ```cpp
 #include <string>
 #include <unordered_map>
@@ -735,8 +738,13 @@ struct LogEntry {
 };
 ```
 
+</details>
+
 
 ### 7.2 Log Parser
+
+<details>
+<summary>LogParser Class</summary>
 
 ```cpp
 #include <regex>
@@ -852,8 +860,13 @@ public:
 };
 ```
 
+</details>
+
 
 ### 7.3 Log Agent (Tail File)
+
+<details>
+<summary>LogAgent Class</summary>
 
 ```cpp
 #include <fstream>
@@ -978,8 +991,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 7.4 Log Shipper (Send to Kafka)
+
+<details>
+<summary>LogShipper Class</summary>
 
 ```cpp
 #include <kafka/KafkaProducer.h>
@@ -1088,8 +1106,13 @@ public:
 };
 ```
 
+</details>
+
 
 ### 7.5 Log Processor (Enrich \& Filter)
+
+<details>
+<summary>LogProcessor Class</summary>
 
 ```cpp
 class LogProcessor {
@@ -1178,8 +1201,13 @@ public:
 };
 ```
 
+</details>
+
 
 ### 7.6 Complete Log Aggregation System
+
+<details>
+<summary>LogAggregationSystem Class</summary>
 
 ```cpp
 class LogAggregationSystem {
@@ -1293,12 +1321,17 @@ int main() {
 }
 ```
 
+</details>
+
 
 ***
 
 ## Step 8: Advanced Features
 
 ### 8.1 Log Indexing (Elasticsearch)
+
+<details>
+<summary>ElasticsearchIndexer Class</summary>
 
 ```cpp
 #include <curl/curl.h>
@@ -1366,8 +1399,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 8.2 Log Query Engine
+
+<details>
+<summary>LogQueryEngine Class</summary>
 
 ```cpp
 class LogQueryEngine {
@@ -1441,8 +1479,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 8.3 Alerting System
+
+<details>
+<summary>AlertRule Class</summary>
 
 ```cpp
 class AlertRule {
@@ -1527,6 +1570,8 @@ private:
 };
 ```
 
+</details>
+
 
 ***
 
@@ -1537,6 +1582,9 @@ private:
 **Problem:** Reading from disk is slow (100 MB/sec)
 
 **Solution: Memory-Mapped Files**
+
+<details>
+<summary>MemoryMappedLogReader Class</summary>
 
 ```cpp
 #include <sys/mman.h>
@@ -1603,12 +1651,17 @@ public:
 // Result: 10x faster than fstream (1 GB/sec vs 100 MB/sec)
 ```
 
+</details>
+
 
 ### Bottleneck 2: JSON Parsing
 
 **Problem:** Parsing 10M JSON logs/sec is CPU-intensive
 
 **Solution: SIMD JSON Parsing**
+
+<details>
+<summary>FastJsonParser Class</summary>
 
 ```cpp
 #include <simdjson.h>
@@ -1633,12 +1686,17 @@ public:
 // Result: 5x faster than nlohmann/json (50M logs/sec vs 10M logs/sec)
 ```
 
+</details>
+
 
 ### Bottleneck 3: Network Bandwidth
 
 **Problem:** 5 GB/sec exceeds network capacity
 
 **Solution: Compression**
+
+<details>
+<summary>CompressedLogShipper Class</summary>
 
 ```cpp
 #include <zlib.h>
@@ -1673,6 +1731,8 @@ public:
 // Compression ratio: 5:1 for text logs
 // Network usage: 5 GB/sec → 1 GB/sec
 ```
+
+</details>
 
 
 ***

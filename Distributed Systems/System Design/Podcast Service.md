@@ -449,6 +449,9 @@ s3://podcast-audio/
 
 ### RSS Feed Polling Strategy[^1][^2]
 
+<details>
+<summary>RSSFeedPoller Class</summary>
+
 ```cpp
 class RSSFeedPoller {
 private:
@@ -589,8 +592,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### Feed Generation (Hybrid Push-Pull)[^3]
+
+<details>
+<summary>FeedGenerator Class</summary>
 
 ```cpp
 class FeedGenerator {
@@ -676,8 +684,13 @@ public:
 };
 ```
 
+</details>
+
 
 ### Audio Streaming with Range Requests
+
+<details>
+<summary>AudioStreamingService Class</summary>
 
 ```cpp
 class AudioStreamingService {
@@ -771,6 +784,8 @@ private:
     }
 };
 ```
+
+</details>
 
 
 ## Step 7: Bottlenecks \& Optimizations

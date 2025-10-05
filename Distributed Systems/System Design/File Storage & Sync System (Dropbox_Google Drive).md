@@ -728,6 +728,9 @@ graph TB
 
 ### 7.1 Content-Defined Chunking (Rabin Fingerprinting)
 
+<details>
+<summary>RabinChunker Class</summary>
+
 ```cpp
 #include <vector>
 #include <string>
@@ -837,8 +840,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 7.2 Chunk Deduplication Manager
+
+<details>
+<summary>ChunkMetadata Struct</summary>
 
 ```cpp
 #include <unordered_map>
@@ -1019,8 +1027,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 7.3 File Sync Engine
+
+<details>
+<summary>FileEvent Struct</summary>
 
 ```cpp
 struct FileEvent {
@@ -1298,8 +1311,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 7.4 Complete File Storage System
+
+<details>
+<summary>FileStorageSystem Class</summary>
 
 ```cpp
 class FileStorageSystem {
@@ -1393,6 +1411,8 @@ int main() {
 }
 ```
 
+</details>
+
 
 ***
 
@@ -1403,6 +1423,9 @@ int main() {
 **Problem:** Users have limited upload bandwidth (5 Mbps typical)
 
 **Solution: Multi-Part Parallel Upload**
+
+<details>
+<summary>ParallelUploader Class</summary>
 
 ```cpp
 class ParallelUploader {
@@ -1432,6 +1455,8 @@ public:
 
 // Result: 4× faster upload (limited by bandwidth, not processing)
 ```
+
+</details>
 
 
 ### Bottleneck 2: Sync Latency

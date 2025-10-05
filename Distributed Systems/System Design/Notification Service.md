@@ -549,6 +549,9 @@ graph TB
 
 ### 6.1 Notification Submission with Validation
 
+<details>
+<summary>class Enum</summary>
+
 ```cpp
 #include <string>
 #include <vector>
@@ -725,8 +728,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 6.2 Template Rendering Engine
+
+<details>
+<summary>TemplateRenderer Class</summary>
 
 ```cpp
 #include <regex>
@@ -850,8 +858,13 @@ int main() {
 }
 ```
 
+</details>
+
 
 ### 6.3 Priority Queue System
+
+<details>
+<summary>PriorityNotificationQueue Class</summary>
 
 ```cpp
 #include <queue>
@@ -966,8 +979,13 @@ public:
 };
 ```
 
+</details>
+
 
 ### 6.4 Rate Limiting (Per Provider)
+
+<details>
+<summary>ProviderRateLimiter Class</summary>
 
 ```cpp
 class ProviderRateLimiter {
@@ -1029,8 +1047,13 @@ public:
 };
 ```
 
+</details>
+
 
 ### 6.5 Retry Logic with Exponential Backoff
+
+<details>
+<summary>RetryManager Class</summary>
 
 ```cpp
 class RetryManager {
@@ -1156,8 +1179,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 6.6 Deduplication
+
+<details>
+<summary>DeduplicationService Class</summary>
 
 ```cpp
 class DeduplicationService {
@@ -1202,8 +1230,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 6.7 Email Provider Abstraction
+
+<details>
+<summary>EmailProvider Class</summary>
 
 ```cpp
 class EmailProvider {
@@ -1293,6 +1326,8 @@ public:
 };
 ```
 
+</details>
+
 
 ***
 
@@ -1303,6 +1338,9 @@ public:
 **Problem:** Rendering 10K notifications/sec requires 10K template renders/sec
 
 **Solution 1: Pre-rendered Templates (Static Parts)**
+
+<details>
+<summary>OptimizedTemplateRenderer Class</summary>
 
 ```cpp
 // Cache pre-rendered static parts of template
@@ -1341,6 +1379,8 @@ public:
 // Result: 10x faster rendering (1ms → 0.1ms)
 ```
 
+</details>
+
 **Trade-off:** Memory (cache) vs CPU (rendering)
 
 ***
@@ -1350,6 +1390,9 @@ public:
 **Problem:** 10K status updates/sec overloads database
 
 **Solution: Batch Writes**
+
+<details>
+<summary>BatchedStatusUpdater Class</summary>
 
 ```cpp
 class BatchedStatusUpdater {
@@ -1410,6 +1453,8 @@ private:
 // Result: 10K updates/sec → 10 DB transactions/sec (1000x reduction)
 ```
 
+</details>
+
 **Trade-off:** Real-time updates vs throughput
 
 ***
@@ -1419,6 +1464,9 @@ private:
 **Problem:** SendGrid allows 100 emails/sec, we need 7K/sec
 
 **Solution 1: Multiple Accounts**
+
+<details>
+<summary>MultiAccountProvider Class</summary>
 
 ```cpp
 class MultiAccountProvider {
@@ -1444,7 +1492,12 @@ public:
 // 70 accounts × 100 emails/sec = 7,000 emails/sec
 ```
 
+</details>
+
 **Solution 2: Queue + Rate-limited Workers**
+
+<details>
+<summary>RateLimitedWorkerPool Class</summary>
 
 ```cpp
 class RateLimitedWorkerPool {
@@ -1471,6 +1524,8 @@ public:
 };
 ```
 
+</details>
+
 **Trade-off:** Cost (multiple accounts) vs complexity
 
 ***
@@ -1480,6 +1535,9 @@ public:
 **Problem:** After deployment, template cache empty → slow first requests
 
 **Solution: Pre-warming**
+
+<details>
+<summary>CacheWarmer Class</summary>
 
 ```cpp
 class CacheWarmer {
@@ -1510,10 +1568,15 @@ public:
 };
 ```
 
+</details>
+
 
 ***
 
 ### Optimization: Smart Routing (Best Provider Selection)
+
+<details>
+<summary>SmartProviderRouter Class</summary>
 
 ```cpp
 class SmartProviderRouter {
@@ -1564,6 +1627,8 @@ private:
 };
 ```
 
+</details>
+
 
 ***
 
@@ -1572,6 +1637,9 @@ private:
 **Problem:** User receives 100 emails per day → spam
 
 **Solution: Daily Digest**
+
+<details>
+<summary>NotificationAggregator Class</summary>
 
 ```cpp
 class NotificationAggregator {
@@ -1623,6 +1691,8 @@ private:
 
 // Result: 100 emails/day → 1 email/day per user
 ```
+
+</details>
 
 
 ***

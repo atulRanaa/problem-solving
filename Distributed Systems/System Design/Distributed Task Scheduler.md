@@ -478,6 +478,9 @@ graph TB
 
 ### 6.1 Task Structure
 
+<details>
+<summary>class Enum</summary>
+
 ```cpp
 #include <string>
 #include <chrono>
@@ -596,8 +599,13 @@ std::string generateTaskId() {
 }
 ```
 
+</details>
+
 
 ### 6.2 Priority Queue (Min-Heap)
+
+<details>
+<summary>TaskComparator Struct</summary>
 
 ```cpp
 #include <queue>
@@ -685,8 +693,13 @@ public:
 };
 ```
 
+</details>
+
 
 ### 6.3 Task Repository (Database Access)
+
+<details>
+<summary>TaskRepository Class</summary>
 
 ```cpp
 #include <pqxx/pqxx>
@@ -908,8 +921,13 @@ public:
 };
 ```
 
+</details>
+
 
 ### 6.4 Scheduler (Leader)
+
+<details>
+<summary>TaskScheduler Class</summary>
 
 ```cpp
 #include <thread>
@@ -1019,8 +1037,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 6.5 Worker (Task Executor)
+
+<details>
+<summary>TaskWorker Class</summary>
 
 ```cpp
 #include <functional>
@@ -1199,8 +1222,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 6.6 Complete Example
+
+<details>
+<summary>C++ Code</summary>
 
 ```cpp
 #include <iostream>
@@ -1298,6 +1326,8 @@ int main() {
 }
 ```
 
+</details>
+
 
 ***
 
@@ -1308,6 +1338,9 @@ int main() {
 **Problem:** Scheduler polls database every second (expensive).
 
 **Solution: Redis as Hot Queue**
+
+<details>
+<summary>RedisTaskQueue Class</summary>
 
 ```cpp
 class RedisTaskQueue {
@@ -1350,6 +1383,8 @@ public:
 // Result: Database queries reduced from 1000/sec to 10/sec
 ```
 
+</details>
+
 **Trade-off:** Memory (Redis) vs database load
 
 ***
@@ -1359,6 +1394,9 @@ public:
 **Problem:** Multiple workers compete for same task.
 
 **Solution: Distributed Lock**
+
+<details>
+<summary>DistributedLock Class</summary>
 
 ```cpp
 class DistributedLock {
@@ -1400,6 +1438,8 @@ bool assignTaskToWorker(const Task& task, const std::string& worker_id) {
 }
 ```
 
+</details>
+
 **Trade-off:** Latency vs correctness
 
 ***
@@ -1409,6 +1449,9 @@ bool assignTaskToWorker(const Task& task, const std::string& worker_id) {
 **Problem:** Low priority tasks never execute if high priority keeps coming.
 
 **Solution: Priority Aging**
+
+<details>
+<summary>AgingPriorityQueue Class</summary>
 
 ```cpp
 class AgingPriorityQueue {
@@ -1427,6 +1470,8 @@ class AgingPriorityQueue {
 // After 50 hours, LOW priority (10) becomes HIGH priority (5)
 ```
 
+</details>
+
 **Trade-off:** Fairness vs strict priority
 
 ***
@@ -1436,6 +1481,9 @@ class AgingPriorityQueue {
 **Problem:** Worker crashes without reporting failure (task stuck).
 
 **Solution: Lease-Based Heartbeat**
+
+<details>
+<summary>LeaseManager Class</summary>
 
 ```cpp
 class LeaseManager {
@@ -1476,11 +1524,16 @@ public:
 // If lease expired → Worker dead → Reassign task
 ```
 
+</details>
+
 **Trade-off:** Heartbeat overhead vs failure detection speed
 
 ***
 
 ### Optimization: Batch Processing
+
+<details>
+<summary>BatchProcessor Class</summary>
 
 ```cpp
 class BatchProcessor {
@@ -1515,6 +1568,8 @@ private:
 
 // Result: 10x throughput for batched operations
 ```
+
+</details>
 
 
 ***

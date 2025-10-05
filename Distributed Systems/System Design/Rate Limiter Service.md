@@ -387,6 +387,9 @@ graph TB
 - Each request consumes 1 token
 - If no tokens → Reject request
 
+<details>
+<summary>TokenBucket Class</summary>
+
 ```cpp
 #include <chrono>
 #include <mutex>
@@ -477,6 +480,8 @@ int main() {
 }
 ```
 
+</details>
+
 
 ### 6.2 Leaky Bucket Algorithm
 
@@ -485,6 +490,9 @@ int main() {
 - Requests enter bucket as water
 - Water leaks at constant rate
 - If bucket overflows → Reject request
+
+<details>
+<summary>LeakyBucket Class</summary>
 
 ```cpp
 class LeakyBucket {
@@ -532,6 +540,8 @@ private:
 };
 ```
 
+</details>
+
 
 ### 6.3 Fixed Window Counter
 
@@ -539,6 +549,9 @@ private:
 
 - Count requests in fixed time windows
 - Reset counter at window boundary
+
+<details>
+<summary>FixedWindowCounter Class</summary>
 
 ```cpp
 class FixedWindowCounter {
@@ -606,6 +619,8 @@ public:
 // Result: 200 requests in 2 seconds!
 ```
 
+</details>
+
 
 ### 6.4 Sliding Window Log
 
@@ -614,6 +629,9 @@ public:
 - Store timestamp of each request
 - Count requests in last N seconds
 - Accurate but memory-intensive
+
+<details>
+<summary>SlidingWindowLog Class</summary>
 
 ```cpp
 #include <deque>
@@ -671,6 +689,8 @@ public:
 // For 1000 requests/sec, 60 sec window: 60,000 timestamps = 480 KB
 ```
 
+</details>
+
 
 ### 6.5 Sliding Window Counter (Hybrid)
 
@@ -678,6 +698,9 @@ public:
 
 - Combines fixed window with weighted counting
 - More accurate than fixed window, less memory than log
+
+<details>
+<summary>SlidingWindowCounter Class</summary>
 
 ```cpp
 class SlidingWindowCounter {
@@ -747,8 +770,13 @@ private:
 // Accuracy: ~99% (vs 100% for sliding window log)
 ```
 
+</details>
+
 
 ### 6.6 Distributed Rate Limiter (Redis-based)
+
+<details>
+<summary>RedisRateLimiter Class</summary>
 
 ```cpp
 #include <hiredis/hiredis.h>
@@ -915,8 +943,13 @@ public:
 };
 ```
 
+</details>
+
 
 ### 6.7 Rate Limiter Service (Complete)
+
+<details>
+<summary>class Enum</summary>
 
 ```cpp
 #include <unordered_map>
@@ -1153,6 +1186,8 @@ int main() {
 }
 ```
 
+</details>
+
 
 ***
 
@@ -1163,6 +1198,9 @@ int main() {
 **Problem:** Every rate limit check requires Redis roundtrip (0.5-1ms).
 
 **Solution: Local Cache with Sync**
+
+<details>
+<summary>HybridRateLimiter Class</summary>
 
 ```cpp
 class HybridRateLimiter {
@@ -1210,6 +1248,8 @@ public:
 // Average latency: 0.99 × 0.001ms + 0.01 × 1ms = 0.011ms
 ```
 
+</details>
+
 **Trade-off:** Accuracy (slight over-limit possible) vs latency
 
 ***
@@ -1220,6 +1260,9 @@ public:
 
 **Solution: Approximate Counting (Sliding Window Counter)**
 
+<details>
+<summary>C++ Code</summary>
+
 ```cpp
 // Sliding Window Log: 60K × 8 bytes = 480 KB per user
 // Sliding Window Counter: 2 × 8 bytes = 16 bytes per user
@@ -1228,6 +1271,8 @@ public:
 // Trade-off: Accuracy drops from 100% to ~99%
 // Acceptable for most use cases
 ```
+
+</details>
 
 
 ***
@@ -1246,6 +1291,9 @@ Result: User made 101 requests (over limit!)
 
 **Solution: Atomic Operations (Lua Script)**
 
+<details>
+<summary>C++ Code</summary>
+
 ```cpp
 // Redis Lua script (atomic)
 const char* script = R"(
@@ -1263,6 +1311,8 @@ const char* script = R"(
 // Executes atomically in Redis - no race condition
 ```
 
+</details>
+
 **Trade-off:** Complexity vs correctness
 
 ***
@@ -1272,6 +1322,9 @@ const char* script = R"(
 **Problem:** After restart, all local caches empty → Redis overload
 
 **Solution: Warm-up Period**
+
+<details>
+<summary>ColdStartHandler Class</summary>
 
 ```cpp
 class ColdStartHandler {
@@ -1306,6 +1359,8 @@ public:
 };
 ```
 
+</details>
+
 
 ***
 
@@ -1314,6 +1369,9 @@ public:
 **Problem:** Many requests hit rate limiter simultaneously
 
 **Solution: Request Coalescing**
+
+<details>
+<summary>RequestCoalescer Class</summary>
 
 ```cpp
 class RequestCoalescer {
@@ -1362,10 +1420,15 @@ public:
 // 100 simultaneous requests → 1 Redis call instead of 100
 ```
 
+</details>
+
 
 ***
 
 ### Optimization: Algorithm Selection Guide
+
+<details>
+<summary>AlgorithmRecommendation Struct</summary>
 
 ```cpp
 struct AlgorithmRecommendation {
@@ -1403,6 +1466,8 @@ struct AlgorithmRecommendation {
 // Sliding Window Log       | O(N)   | 100%     | No    | High Accuracy
 // Sliding Window Counter   | O(1)   | ~99%     | No    | Production (Best)
 ```
+
+</details>
 
 
 ***

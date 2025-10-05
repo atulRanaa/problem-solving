@@ -584,6 +584,9 @@ graph TB
 
 ### 6.1 Metric Types
 
+<details>
+<summary>Metric Class</summary>
+
 ```cpp
 #include <string>
 #include <unordered_map>
@@ -814,8 +817,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 6.2 Metrics Registry
+
+<details>
+<summary>MetricsRegistry Class</summary>
 
 ```cpp
 class MetricsRegistry {
@@ -905,8 +913,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 6.3 HTTP Metrics Exporter
+
+<details>
+<summary>MetricsExporter Class</summary>
 
 ```cpp
 #include <httplib.h>
@@ -944,8 +957,13 @@ public:
 };
 ```
 
+</details>
+
 
 ### 6.4 System Metrics Collector
+
+<details>
+<summary>SystemMetricsCollector Class</summary>
 
 ```cpp
 #include <sys/sysinfo.h>
@@ -1054,8 +1072,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 6.5 Application Metrics Example
+
+<details>
+<summary>WebServer Class</summary>
 
 ```cpp
 class WebServer {
@@ -1108,8 +1131,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 6.6 Complete Monitoring System
+
+<details>
+<summary>C++ Code</summary>
 
 ```cpp
 int main() {
@@ -1164,6 +1192,8 @@ int main() {
     return 0;
 }
 ```
+
+</details>
 
 
 ***
@@ -1232,6 +1262,9 @@ groups:
 
 ### 7.3 Downsampling (Data Reduction)
 
+<details>
+<summary>Downsampler Class</summary>
+
 ```cpp
 class Downsampler {
 public:
@@ -1285,6 +1318,8 @@ public:
 // Compression: 6x reduction
 ```
 
+</details>
+
 
 ***
 
@@ -1295,6 +1330,9 @@ public:
 **Problem:** 1M unique time series × 1000 labels = 1B series = OOM
 
 **Solution: Cardinality Limits**
+
+<details>
+<summary>CardinalityLimiter Class</summary>
 
 ```cpp
 class CardinalityLimiter {
@@ -1322,12 +1360,17 @@ public:
 // ❌ Avoid: user_id, trace_id, session_id (high cardinality)
 ```
 
+</details>
+
 
 ### Bottleneck 2: Query Performance
 
 **Problem:** Querying 1M time series is slow
 
 **Solution: Indexing + Caching**
+
+<details>
+<summary>TimeSeriesIndex Class</summary>
 
 ```cpp
 class TimeSeriesIndex {
@@ -1379,6 +1422,8 @@ public:
 // With index: Lookup 2 sets + intersect → 10ms (100x faster)
 ```
 
+</details>
+
 
 ### Bottleneck 3: Storage Size
 
@@ -1410,6 +1455,9 @@ Savings: 91%
 
 **Meta-Metrics (Monitor the monitoring system itself):**
 
+<details>
+<summary>C++ Code</summary>
+
 ```cpp
 // Scrape duration
 scrape_duration_seconds{job="prometheus"} 0.15
@@ -1426,6 +1474,8 @@ prometheus_tsdb_storage_bytes_total 8.5e10
 // Alerts
 alertmanager_alerts_active 3
 ```
+
+</details>
 
 
 ***

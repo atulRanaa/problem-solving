@@ -247,6 +247,9 @@ Solution: Server-Side Queue
 
 **Queue Structure:**
 
+<details>
+<summary>MessageQueue Struct</summary>
+
 ```cpp
 struct MessageQueue {
     user_id: 123
@@ -259,6 +262,8 @@ struct MessageQueue {
     retention: 30 days
 }
 ```
+
+</details>
 
 
 ### 2.5 Last Seen \& Online Status
@@ -294,7 +299,7 @@ Server: For each member:
   - Add message to member's inbox
   - If online: Push via WebSocket
   - If offline: Queue + push notification
-  
+
 Latency: ~100ms (parallel delivery)
 
 Option 2: Pull-Based
@@ -657,7 +662,7 @@ CREATE TABLE users (
     status_message TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     last_seen TIMESTAMPTZ,
-    
+
     INDEX idx_phone (phone_number)
 );
 
@@ -668,7 +673,7 @@ CREATE TABLE contacts (
     contact_name VARCHAR(100),  -- User's custom name for contact
     added_at TIMESTAMPTZ DEFAULT NOW(),
     blocked BOOLEAN DEFAULT FALSE,
-    
+
     PRIMARY KEY (user_id, contact_user_id),
     INDEX idx_user_contacts (user_id)
 );
@@ -691,7 +696,7 @@ CREATE TABLE group_members (
     role VARCHAR(20) DEFAULT 'member',  -- admin, member
     joined_at TIMESTAMPTZ DEFAULT NOW(),
     left_at TIMESTAMPTZ,  -- NULL if still member
-    
+
     PRIMARY KEY (group_id, user_id),
     INDEX idx_user_groups (user_id)
 );
@@ -702,7 +707,7 @@ CREATE TABLE user_keys (
     key_id UUID PRIMARY KEY,
     public_key TEXT NOT NULL,
     created_at TIMESTAMPTZ DEFAULT NOW(),
-    
+
     INDEX idx_user_keys (user_id)
 );
 ```
@@ -719,98 +724,98 @@ graph TB
         ANDROID[Android App]
         WEB[Web Client]
     end
-    
+
     subgraph "Load Balancer & Gateway"
         LB[Load Balancer<br/>Nginx/HAProxy<br/>SSL Termination]
-        
+
         GATEWAY[API Gateway<br/>REST endpoints<br/>Auth/Rate limiting]
     end
-    
+
     subgraph "WebSocket Connection Layer (Erlang)"
         WS1[Chat Server 1<br/>50K connections<br/>Erlang/BEAM]
         WS2[Chat Server 2<br/>50K connections]
         WS3[Chat Server N<br/>10K total servers]
     end
-    
+
     subgraph "Message Routing & Delivery"
         ROUTER[Message Router<br/>Route to recipient<br/>Fan-out for groups]
-        
+
         QUEUE[Message Queue<br/>Kafka<br/>Buffering & replay]
     end
-    
+
     subgraph "Real-Time State (Redis)"
         REDIS1[Redis Cluster 1<br/>Online users<br/>WS mapping]
         REDIS2[Redis Cluster 2<br/>Typing status<br/>Presence]
     end
-    
+
     subgraph "Message Storage (Cassandra)"
         CASS1[Cassandra Node 1<br/>Messages<br/>Time-series]
         CASS2[Cassandra Node 2]
         CASS3[Cassandra Node N<br/>1000 nodes]
     end
-    
+
     subgraph "User & Group Data (PostgreSQL)"
         PG_MASTER[(PostgreSQL Master<br/>Users, Groups<br/>Contacts)]
         PG_REPLICA[(PostgreSQL Replicas<br/>Read scaling)]
     end
-    
+
     subgraph "Media Storage"
         S3[S3/Blob Storage<br/>Images, Videos<br/>Audio files<br/>390 PB]
-        
+
         CDN[CDN<br/>CloudFront/Akamai<br/>Media delivery]
     end
-    
+
     subgraph "Push Notifications"
         PUSH[Push Service<br/>APNs (iOS)<br/>FCM (Android)<br/>486K/sec]
     end
-    
+
     subgraph "Supporting Services"
         AUTH[Auth Service<br/>Phone verification<br/>JWT tokens]
-        
+
         PRESENCE[Presence Service<br/>Last seen<br/>Online status]
-        
+
         ENCRYPTION[Key Service<br/>Public key distribution<br/>Signal protocol]
     end
-    
+
     subgraph "Monitoring"
         METRICS[Metrics<br/>Prometheus<br/>Connection count<br/>Message latency]
-        
+
         LOGS[Logs<br/>ELK Stack<br/>Error tracking]
     end
-    
+
     IOS & ANDROID & WEB -->|HTTPS| LB
     LB --> GATEWAY
-    
+
     IOS & ANDROID & WEB -->|WSS upgrade| LB
     LB --> WS1 & WS2 & WS3
-    
+
     GATEWAY --> AUTH
     GATEWAY --> PG_MASTER
-    
+
     WS1 & WS2 & WS3 <-->|Check online status| REDIS1 & REDIS2
     WS1 & WS2 & WS3 -->|Route message| ROUTER
-    
+
     ROUTER -->|Buffer| QUEUE
     ROUTER -->|Fan-out| WS1 & WS2 & WS3
-    
+
     ROUTER -->|Store| CASS1 & CASS2 & CASS3
     ROUTER -->|User/Group lookup| PG_REPLICA
-    
+
     WS1 & WS2 & WS3 -->|Offline users| PUSH
-    
+
     GATEWAY -->|Upload media| S3
     S3 --> CDN
     WEB -->|Download media| CDN
-    
+
     WS1 & WS2 & WS3 --> PRESENCE
     PRESENCE --> REDIS1
-    
+
     AUTH <--> PG_MASTER
     ENCRYPTION <--> PG_MASTER
-    
+
     WS1 & ROUTER & CASS1 --> METRICS
     WS1 & ROUTER --> LOGS
-    
+
     style WS1 fill:#90EE90
     style WS2 fill:#90EE90
     style REDIS1 fill:#dc382d
@@ -824,6 +829,12 @@ graph TB
 ## Step 7: Core Implementation (C++)
 
 ### 7.1 Message Structure
+
+<details>
+<summary>Message Structure</summary>
+
+<details>
+<summary>class Enum</summary>
 
 ```cpp
 #include <string>
@@ -856,21 +867,21 @@ struct Message {
     std::string from_user_id;
     std::string to_user_id;            // User ID or Group ID
     bool is_group;
-    
+
     MessageType type;
     std::string content;               // Text or encrypted blob
     std::string media_url;             // S3 URL if media
-    
+
     system_clock::time_point timestamp;
     MessageStatus status;
-    
+
     system_clock::time_point delivered_at;
     system_clock::time_point read_at;
-    
+
     // Encryption
     std::string encryption_version;    // "signal_v3"
     std::string ciphertext;
-    
+
     // Generate unique message ID
     static std::string generateMessageId() {
         // UUID v4 generation (simplified)
@@ -878,7 +889,7 @@ struct Message {
         auto random = std::rand();
         return "msg_" + std::to_string(now) + "_" + std::to_string(random);
     }
-    
+
     json toJson() const {
         json j = {
             {"msg_id", msg_id},
@@ -892,21 +903,21 @@ struct Message {
             ).count()},
             {"status", static_cast<int>(status)}
         };
-        
+
         if (!media_url.empty()) {
             j["media_url"] = media_url;
         }
-        
+
         if (!ciphertext.empty()) {
             j["encryption"] = {
                 {"version", encryption_version},
                 {"ciphertext", ciphertext}
             };
         }
-        
+
         return j;
     }
-    
+
     static Message fromJson(const json& j) {
         Message msg;
         msg.msg_id = j["msg_id"];
@@ -919,23 +930,33 @@ struct Message {
             milliseconds(j["timestamp"].get<int64_t>())
         );
         msg.status = static_cast<MessageStatus>(j["status"]);
-        
+
         if (j.contains("media_url")) {
             msg.media_url = j["media_url"];
         }
-        
+
         if (j.contains("encryption")) {
             msg.encryption_version = j["encryption"]["version"];
             msg.ciphertext = j["encryption"]["ciphertext"];
         }
-        
+
         return msg;
     }
 };
 ```
 
+</details>
+
+</details>
+
 
 ### 7.2 WebSocket Connection Manager
+
+<details>
+<summary>WebSocket Connection Manager</summary>
+
+<details>
+<summary>WebSocketConnectionManager Class</summary>
 
 ```cpp
 #include <websocketpp/config/asio_no_tls.hpp>
@@ -949,67 +970,67 @@ typedef websocketpp::connection_hdl ConnectionHandle;
 class WebSocketConnectionManager {
 private:
     WebSocketServer server_;
-    
+
     // User ID → WebSocket connection
     std::unordered_map<std::string, ConnectionHandle> user_connections_;
-    
+
     // Connection → User ID (reverse mapping)
-    std::unordered_map<ConnectionHandle, std::string, 
+    std::unordered_map<ConnectionHandle, std::string,
                       std::owner_less<ConnectionHandle>> connection_users_;
-    
+
     mutable std::shared_mutex connections_mtx_;
-    
+
     // Callback for message router
     std::function<void(const Message&)> message_callback_;
-    
+
 public:
     WebSocketConnectionManager(int port) {
         // Initialize WebSocket server
         server_.init_asio();
         server_.set_reuse_addr(true);
-        
+
         // Set handlers
         server_.set_open_handler([this](ConnectionHandle hdl) {
             onConnect(hdl);
         });
-        
+
         server_.set_close_handler([this](ConnectionHandle hdl) {
             onDisconnect(hdl);
         });
-        
-        server_.set_message_handler([this](ConnectionHandle hdl, 
+
+        server_.set_message_handler([this](ConnectionHandle hdl,
                                           WebSocketServer::message_ptr msg) {
             onMessage(hdl, msg);
         });
-        
+
         server_.listen(port);
         server_.start_accept();
     }
-    
+
     void run() {
         std::cout << "WebSocket server running..." << std::endl;
         server_.run();
     }
-    
+
     void stop() {
         server_.stop();
     }
-    
+
     // Register message callback
     void setMessageCallback(std::function<void(const Message&)> callback) {
         message_callback_ = callback;
     }
-    
+
     // Send message to specific user
     bool sendToUser(const std::string& user_id, const Message& msg) {
         std::shared_lock<std::shared_mutex> lock(connections_mtx_);
-        
+
         auto it = user_connections_.find(user_id);
         if (it == user_connections_.end()) {
             std::cout << "User " << user_id << " not connected" << std::endl;
             return false;  // User offline
         }
-        
+
         try {
             std::string json_msg = msg.toJson().dump();
             server_.send(it->second, json_msg, websocketpp::frame::opcode::text);
@@ -1019,57 +1040,57 @@ public:
             return false;
         }
     }
-    
+
     // Check if user is online
     bool isUserOnline(const std::string& user_id) const {
         std::shared_lock<std::shared_mutex> lock(connections_mtx_);
         return user_connections_.count(user_id) > 0;
     }
-    
+
     // Get connection statistics
     size_t getConnectionCount() const {
         std::shared_lock<std::shared_mutex> lock(connections_mtx_);
         return user_connections_.size();
     }
-    
+
 private:
     void onConnect(ConnectionHandle hdl) {
         std::cout << "New WebSocket connection" << std::endl;
-        
+
         // Note: User authentication happens via first message
         // Connection is temporarily stored without user ID
     }
-    
+
     void onDisconnect(ConnectionHandle hdl) {
         std::unique_lock<std::shared_mutex> lock(connections_mtx_);
-        
+
         auto it = connection_users_.find(hdl);
         if (it != connection_users_.end()) {
             std::string user_id = it->second;
             std::cout << "User " << user_id << " disconnected" << std::endl;
-            
+
             user_connections_.erase(user_id);
             connection_users_.erase(it);
-            
+
             // Update last seen timestamp
             updateLastSeen(user_id);
         }
     }
-    
+
     void onMessage(ConnectionHandle hdl, WebSocketServer::message_ptr msg) {
         try {
             std::string payload = msg->get_payload();
             json j = json::parse(payload);
-            
+
             std::string msg_type = j["type"];
-            
+
             if (msg_type == "auth") {
                 // Authenticate connection
                 handleAuth(hdl, j);
             } else if (msg_type == "message") {
                 // Forward message
                 Message message = Message::fromJson(j);
-                
+
                 if (message_callback_) {
                     message_callback_(message);
                 }
@@ -1080,77 +1101,77 @@ private:
                 // Handle read receipt
                 handleReadReceipt(j);
             }
-            
+
         } catch (const std::exception& e) {
             std::cerr << "Error processing message: " << e.what() << std::endl;
         }
     }
-    
+
     void handleAuth(ConnectionHandle hdl, const json& auth_data) {
         std::string user_id = auth_data["user_id"];
         std::string auth_token = auth_data["token"];
-        
+
         // Validate token (check with auth service)
         if (validateAuthToken(user_id, auth_token)) {
             std::unique_lock<std::shared_mutex> lock(connections_mtx_);
-            
+
             // Remove old connection if exists
             auto old_it = user_connections_.find(user_id);
             if (old_it != user_connections_.end()) {
                 connection_users_.erase(old_it->second);
             }
-            
+
             // Register new connection
             user_connections_[user_id] = hdl;
             connection_users_[hdl] = user_id;
-            
+
             std::cout << "User " << user_id << " authenticated and connected" << std::endl;
-            
+
             // Send auth success
             json response = {
                 {"type", "auth_success"},
                 {"user_id", user_id}
             };
-            
+
             server_.send(hdl, response.dump(), websocketpp::frame::opcode::text);
-            
+
             // Mark user as online
             markUserOnline(user_id);
-            
+
             // Deliver queued messages
             deliverQueuedMessages(user_id);
         } else {
             std::cout << "Authentication failed for user " << user_id << std::endl;
-            server_.close(hdl, websocketpp::close::status::policy_violation, 
+            server_.close(hdl, websocketpp::close::status::policy_violation,
                          "Authentication failed");
         }
     }
-    
+
     void handleDeliveryAck(const json& ack_data) {
         std::string msg_id = ack_data["msg_id"];
         // Update message status to DELIVERED
         // Forward to sender
     }
-    
+
     void handleReadReceipt(const json& receipt_data) {
         std::string msg_id = receipt_data["msg_id"];
         // Update message status to READ
         // Forward to sender
     }
-    
+
     bool validateAuthToken(const std::string& user_id, const std::string& token) {
         // Verify JWT token with auth service
         return true;  // Simplified
     }
-    
+
     void markUserOnline(const std::string& user_id) {
         // Update Redis: ZADD online_users <timestamp> <user_id>
     }
-    
+
     void updateLastSeen(const std::string& user_id) {
         // Update Redis: last_seen:<user_id> = <timestamp>
     }
-    
+
     void deliverQueuedMessages(const std::string& user_id) {
         // Fetch from Redis: LRANGE offline_queue:<user_id>
         // Send each message via WebSocket
@@ -1159,8 +1180,18 @@ private:
 };
 ```
 
+</details>
+
+</details>
+
 
 ### 7.3 Message Router
+
+<details>
+<summary>Message Router</summary>
+
+<details>
+<summary>MessageRouter Class</summary>
 
 ```cpp
 #include <queue>
@@ -1172,51 +1203,51 @@ private:
     WebSocketConnectionManager& ws_manager_;
     DatabaseConnection& db_;
     RedisClient& redis_;
-    
+
     // Message queue for async processing
     std::queue<Message> message_queue_;
     std::mutex queue_mtx_;
     std::condition_variable queue_cv_;
-    
+
     std::vector<std::thread> worker_threads_;
     std::atomic<bool> running_{false};
-    
+
     // Statistics
     std::atomic<uint64_t> messages_routed_{0};
     std::atomic<uint64_t> messages_delivered_{0};
     std::atomic<uint64_t> messages_queued_{0};
-    
+
 public:
-    MessageRouter(WebSocketConnectionManager& ws_mgr, 
+    MessageRouter(WebSocketConnectionManager& ws_mgr,
                  DatabaseConnection& db,
                  RedisClient& redis)
         : ws_manager_(ws_mgr), db_(db), redis_(redis) {}
-    
+
     void start(int num_workers = 10) {
         running_ = true;
-        
+
         // Start worker threads
         for (int i = 0; i < num_workers; ++i) {
             worker_threads_.emplace_back([this]() {
                 processMessages();
             });
         }
-        
-        std::cout << "Message router started with " << num_workers 
+
+        std::cout << "Message router started with " << num_workers
                  << " workers" << std::endl;
     }
-    
+
     void stop() {
         running_ = false;
         queue_cv_.notify_all();
-        
+
         for (auto& thread : worker_threads_) {
             if (thread.joinable()) {
                 thread.join();
             }
         }
     }
-    
+
     // Enqueue message for routing
     void routeMessage(const Message& msg) {
         {
@@ -1224,10 +1255,10 @@ public:
             message_queue_.push(msg);
             queue_cv_.notify_one();
         }
-        
+
         messages_routed_++;
     }
-    
+
     void printStats() {
         std::cout << "\n=== Message Router Stats ===" << std::endl;
         std::cout << "Messages routed: " << messages_routed_ << std::endl;
@@ -1235,27 +1266,27 @@ public:
         std::cout << "Messages queued (offline): " << messages_queued_ << std::endl;
         std::cout << "Queue size: " << message_queue_.size() << std::endl;
     }
-    
+
 private:
     void processMessages() {
         while (running_) {
             Message msg;
-            
+
             {
                 std::unique_lock<std::mutex> lock(queue_mtx_);
-                
+
                 queue_cv_.wait(lock, [this]() {
                     return !message_queue_.empty() || !running_;
                 });
-                
+
                 if (!running_ && message_queue_.empty()) break;
-                
+
                 if (message_queue_.empty()) continue;
-                
+
                 msg = message_queue_.front();
                 message_queue_.pop();
             }
-            
+
             // Process message
             if (msg.is_group) {
                 routeGroupMessage(msg);
@@ -1264,19 +1295,19 @@ private:
             }
         }
     }
-    
+
     void routeOneToOneMessage(Message& msg) {
         // 1. Store message in database
         storeMessage(msg);
-        
+
         // 2. Send ACK to sender (message sent ✓)
         sendAckToSender(msg);
-        
+
         // 3. Deliver to recipient
         if (ws_manager_.isUserOnline(msg.to_user_id)) {
             // Recipient online - deliver via WebSocket
             bool delivered = ws_manager_.sendToUser(msg.to_user_id, msg);
-            
+
             if (delivered) {
                 messages_delivered_++;
             } else {
@@ -1286,29 +1317,29 @@ private:
         } else {
             // Recipient offline - queue message
             queueMessage(msg);
-            
+
             // Send push notification
             sendPushNotification(msg);
         }
     }
-    
+
     void routeGroupMessage(const Message& msg) {
         // 1. Store message in database
         storeMessage(msg);
-        
+
         // 2. Send ACK to sender
         sendAckToSender(msg);
-        
+
         // 3. Get group members
         auto members = getGroupMembers(msg.to_user_id);  // to_user_id is group_id
-        
+
         // 4. Fan-out to all members (except sender)
         for (const auto& member_id : members) {
             if (member_id == msg.from_user_id) continue;  // Skip sender
-            
+
             Message member_msg = msg;
             member_msg.to_user_id = member_id;
-            
+
             if (ws_manager_.isUserOnline(member_id)) {
                 ws_manager_.sendToUser(member_id, member_msg);
             } else {
@@ -1317,17 +1348,17 @@ private:
             }
         }
     }
-    
+
     void storeMessage(const Message& msg) {
         // Store in Cassandra
         std::string query = R"(
-            INSERT INTO messages (user_id, timestamp, msg_id, from_user_id, 
+            INSERT INTO messages (user_id, timestamp, msg_id, from_user_id,
                                  to_user_id, content, media_url, status)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         )";
-        
+
         // Store for recipient
-        db_.execute(query, 
+        db_.execute(query,
             msg.to_user_id,
             msg.timestamp,
             msg.msg_id,
@@ -1337,7 +1368,7 @@ private:
             msg.media_url,
             static_cast<int>(msg.status)
         );
-        
+
         // Also store for sender (for multi-device sync)
         db_.execute(query,
             msg.from_user_id,
@@ -1350,7 +1381,7 @@ private:
             static_cast<int>(msg.status)
         );
     }
-    
+
     void sendAckToSender(const Message& msg) {
         if (ws_manager_.isUserOnline(msg.from_user_id)) {
             json ack = {
@@ -1361,25 +1392,25 @@ private:
                     system_clock::now().time_since_epoch()
                 ).count()}
             };
-            
+
             Message ack_msg;
             ack_msg.msg_id = msg.msg_id;
             ack_msg.content = ack.dump();
             ack_msg.to_user_id = msg.from_user_id;
-            
+
             ws_manager_.sendToUser(msg.from_user_id, ack_msg);
         }
     }
-    
+
     void queueMessage(const Message& msg) {
         // Store in Redis offline queue
         redis_.lpush("offline_queue:" + msg.to_user_id, msg.toJson().dump());
-        
+
         messages_queued_++;
-        
+
         std::cout << "Queued message for offline user: " << msg.to_user_id << std::endl;
     }
-    
+
     void sendPushNotification(const Message& msg) {
         // Send to APNs (iOS) or FCM (Android)
         json notification = {
@@ -1388,32 +1419,42 @@ private:
             {"body", msg.content.substr(0, 50)},  // Preview
             {"badge", 1}
         };
-        
+
         // Push to notification service (async)
         std::cout << "Sent push notification to " << msg.to_user_id << std::endl;
     }
-    
+
     std::vector<std::string> getGroupMembers(const std::string& group_id) {
         // Query PostgreSQL for group members
         std::string query = R"(
-            SELECT user_id FROM group_members 
+            SELECT user_id FROM group_members
             WHERE group_id = ? AND left_at IS NULL
         )";
-        
+
         auto results = db_.query(query, group_id);
-        
+
         std::vector<std::string> members;
         for (const auto& row : results) {
             members.push_back(row["user_id"]);
         }
-        
+
         return members;
     }
 };
 ```
 
+</details>
+
+</details>
+
 
 ### 7.4 Complete WhatsApp System
+
+<details>
+<summary>Complete WhatsApp System</summary>
+
+<details>
+<summary>WhatsAppSystem Class</summary>
 
 ```cpp
 class WhatsAppSystem {
@@ -1422,35 +1463,35 @@ private:
     MessageRouter message_router_;
     DatabaseConnection db_;
     RedisClient redis_;
-    
+
 public:
     WhatsAppSystem(int ws_port)
         : ws_manager_(ws_port),
           db_("cassandra://localhost:9042"),
           redis_("redis://localhost:6379"),
           message_router_(ws_manager_, db_, redis_) {}
-    
+
     void start() {
         std::cout << "=== Starting WhatsApp System ===" << std::endl;
-        
+
         // Start message router
         message_router_.start(10);  // 10 worker threads
-        
+
         // Register message callback
         ws_manager_.setMessageCallback([this](const Message& msg) {
             // Route incoming messages
             message_router_.routeMessage(msg);
         });
-        
+
         // Start WebSocket server (blocking)
         ws_manager_.run();
     }
-    
+
     void stop() {
         message_router_.stop();
         ws_manager_.stop();
     }
-    
+
     void printStats() {
         std::cout << "\n=== WhatsApp System Stats ===" << std::endl;
         std::cout << "Active connections: " << ws_manager_.getConnectionCount() << std::endl;
@@ -1461,25 +1502,29 @@ public:
 // Example usage
 int main() {
     WhatsAppSystem whatsapp(9090);
-    
+
     // Start in separate thread to allow stats printing
     std::thread server_thread([&whatsapp]() {
         whatsapp.start();
     });
-    
+
     // Run for demo
     std::this_thread::sleep_for(std::chrono::seconds(60));
-    
+
     whatsapp.printStats();
     whatsapp.stop();
-    
+
     if (server_thread.joinable()) {
         server_thread.join();
     }
-    
+
     return 0;
 }
 ```
+
+</details>
+
+</details>
 
 
 ***
@@ -1487,6 +1532,12 @@ int main() {
 ## Step 8: Advanced Features
 
 ### 8.1 Message Retry \& Acknowledgment
+
+<details>
+<summary>Message Retry Manager</summary>
+
+<details>
+<summary>MessageRetryManager Class</summary>
 
 ```cpp
 class MessageRetryManager {
@@ -1496,78 +1547,78 @@ private:
         system_clock::time_point sent_at;
         int retry_count;
     };
-    
+
     std::unordered_map<std::string, PendingMessage> pending_messages_;
     std::mutex mtx_;
-    
+
     const int MAX_RETRIES = 3;
     const seconds RETRY_INTERVAL{5};
-    
+
     std::thread retry_thread_;
     std::atomic<bool> running_{false};
-    
+
 public:
     void start() {
         running_ = true;
-        
+
         retry_thread_ = std::thread([this]() {
             retryLoop();
         });
     }
-    
+
     void stop() {
         running_ = false;
         if (retry_thread_.joinable()) {
             retry_thread_.join();
         }
     }
-    
+
     void addPendingMessage(const Message& msg) {
         std::lock_guard<std::mutex> lock(mtx_);
-        
+
         pending_messages_[msg.msg_id] = {
             msg,
             system_clock::now(),
             0
         };
     }
-    
+
     void markDelivered(const std::string& msg_id) {
         std::lock_guard<std::mutex> lock(mtx_);
         pending_messages_.erase(msg_id);
     }
-    
+
 private:
     void retryLoop() {
         while (running_) {
             std::this_thread::sleep_for(RETRY_INTERVAL);
-            
+
             std::lock_guard<std::mutex> lock(mtx_);
-            
+
             auto now = system_clock::now();
             std::vector<std::string> to_remove;
-            
+
             for (auto& [msg_id, pending] : pending_messages_) {
                 auto elapsed = duration_cast<seconds>(now - pending.sent_at);
-                
+
                 if (elapsed >= RETRY_INTERVAL) {
                     if (pending.retry_count < MAX_RETRIES) {
                         // Retry sending
-                        std::cout << "Retrying message " << msg_id 
+                        std::cout << "Retrying message " << msg_id
                                  << " (attempt " << (pending.retry_count + 1) << ")" << std::endl;
-                        
+
                         // Re-send message (would call router)
                         pending.sent_at = now;
                         pending.retry_count++;
                     } else {
                         // Max retries exceeded
-                        std::cout << "Message " << msg_id << " failed after " 
+                        std::cout << "Message " << msg_id << " failed after "
                                  << MAX_RETRIES << " retries" << std::endl;
                         to_remove.push_back(msg_id);
                     }
                 }
             }
-            
+
             for (const auto& msg_id : to_remove) {
                 pending_messages_.erase(msg_id);
             }
@@ -1576,42 +1627,52 @@ private:
 };
 ```
 
+</details>
+
+</details>
+
 
 ### 8.2 Typing Indicator
+
+<details>
+<summary>Typing Indicator Manager</summary>
+
+<details>
+<summary>TypingIndicatorManager Class</summary>
 
 ```cpp
 class TypingIndicatorManager {
 private:
     RedisClient& redis_;
-    
+
     const seconds TYPING_TTL{5};  // Typing status expires after 5 seconds
-    
+
 public:
     TypingIndicatorManager(RedisClient& redis) : redis_(redis) {}
-    
+
     void setTyping(const std::string& chat_id, const std::string& user_id) {
         std::string key = "typing:" + chat_id;
-        
+
         // Add user to typing set with TTL
         redis_.setex(key + ":" + user_id, "1", TYPING_TTL);
-        
+
         // Notify other participants in chat
         broadcastTypingStatus(chat_id, user_id, true);
     }
-    
+
     void clearTyping(const std::string& chat_id, const std::string& user_id) {
         std::string key = "typing:" + chat_id;
-        
+
         redis_.del(key + ":" + user_id);
-        
+
         broadcastTypingStatus(chat_id, user_id, false);
     }
-    
+
     std::vector<std::string> getTypingUsers(const std::string& chat_id) {
         std::string pattern = "typing:" + chat_id + ":*";
-        
+
         auto keys = redis_.keys(pattern);
-        
+
         std::vector<std::string> typing_users;
         for (const auto& key : keys) {
             // Extract user_id from key
@@ -1620,12 +1681,12 @@ public:
                 typing_users.push_back(key.substr(pos + 1));
             }
         }
-        
+
         return typing_users;
     }
-    
+
 private:
-    void broadcastTypingStatus(const std::string& chat_id, 
+    void broadcastTypingStatus(const std::string& chat_id,
                               const std::string& user_id,
                               bool is_typing) {
         json notification = {
@@ -1634,12 +1695,16 @@ private:
             {"user_id", user_id},
             {"is_typing", is_typing}
         };
-        
+
         // Broadcast to all chat participants
         // (Would integrate with WebSocket manager)
     }
 };
 ```
+
+</details>
+
+</details>
 
 
 ***
@@ -1652,13 +1717,19 @@ private:
 
 **Solution: Lazy Fan-Out**
 
+<details>
+<summary>Optimized Group Router</summary>
+
+<details>
+<summary>OptimizedGroupRouter Class</summary>
+
 ```cpp
 class OptimizedGroupRouter {
 public:
     void routeGroupMessage(const Message& msg, const std::vector<std::string>& members) {
         // Store message once in group table
         storeInGroupTable(msg);
-        
+
         // For online members: Send pointer to message
         for (const auto& member_id : members) {
             if (isOnline(member_id)) {
@@ -1669,7 +1740,7 @@ public:
             }
         }
     }
-    
+
 private:
     void sendMessagePointer(const std::string& user_id, const std::string& msg_id) {
         json pointer = {
@@ -1677,7 +1748,7 @@ private:
             {"msg_id", msg_id},
             {"fetch_from", "group_messages_table"}
         };
-        
+
         // Client fetches actual message when needed
     }
 };
@@ -1687,6 +1758,10 @@ private:
 // 20x improvement!
 ```
 
+</details>
+
+</details>
+
 
 ### Bottleneck 2: Hot Shards (Celebrity Accounts)
 
@@ -1694,12 +1769,18 @@ private:
 
 **Solution: Consistent Hashing with Virtual Nodes**
 
+<details>
+<summary>Consistent Hash Router</summary>
+
+<details>
+<summary>ConsistentHashRouter Class</summary>
+
 ```cpp
 class ConsistentHashRouter {
 private:
     const int VIRTUAL_NODES = 150;
     std::map<uint64_t, std::string> hash_ring_;
-    
+
 public:
     void addServer(const std::string& server_id) {
         for (int i = 0; i < VIRTUAL_NODES; ++i) {
@@ -1708,17 +1789,17 @@ public:
             hash_ring_[hash] = server_id;
         }
     }
-    
+
     std::string getServer(const std::string& user_id) {
         uint64_t hash = hashFunction(user_id);
-        
+
         // Find next server on ring
         auto it = hash_ring_.lower_bound(hash);
-        
+
         if (it == hash_ring_.end()) {
             return hash_ring_.begin()->second;
         }
-        
+
         return it->second;
     }
 };
@@ -1727,12 +1808,22 @@ public:
 // Load spread more evenly
 ```
 
+</details>
+
+</details>
+
 
 ### Bottleneck 3: Database Write Hotspots
 
 **Problem:** 1.62M writes/sec overwhelms database
 
 **Solution: Write-Behind Cache + Batching**
+
+<details>
+<summary>Write Behind Cache</summary>
+
+<details>
+<summary>WriteBehindCache Class</summary>
 
 ```cpp
 class WriteBehindCache {
@@ -1741,24 +1832,24 @@ private:
     std::mutex buffer_mtx_;
     const size_t BATCH_SIZE = 1000;
     const seconds FLUSH_INTERVAL{5};
-    
+
     std::thread flush_thread_;
     std::atomic<bool> running_{false};
-    
+
 public:
     void write(const Message& msg) {
         std::lock_guard<std::mutex> lock(buffer_mtx_);
-        
+
         write_buffer_.push_back(msg);
-        
+
         if (write_buffer_.size() >= BATCH_SIZE) {
             flush();
         }
     }
-    
+
     void start() {
         running_ = true;
-        
+
         flush_thread_ = std::thread([this]() {
             while (running_) {
                 std::this_thread::sleep_for(FLUSH_INTERVAL);
@@ -1766,25 +1857,25 @@ public:
             }
         });
     }
-    
+
 private:
     void flush() {
         std::vector<Message> to_flush;
-        
+
         {
             std::lock_guard<std::mutex> lock(buffer_mtx_);
             to_flush = std::move(write_buffer_);
             write_buffer_.clear();
         }
-        
+
         if (to_flush.empty()) return;
-        
+
         // Batch insert to database
         batchInsert(to_flush);
-        
+
         std::cout << "Flushed " << to_flush.size() << " messages to DB" << std::endl;
     }
-    
+
     void batchInsert(const std::vector<Message>& messages) {
         // Single batch INSERT with multiple rows
         // Much faster than individual INSERTs
@@ -1793,6 +1884,10 @@ private:
 
 // Result: 1.62M individual writes → 1,620 batch writes (1000x reduction)
 ```
+
+</details>
+
+</details>
 
 
 ***

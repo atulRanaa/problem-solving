@@ -896,6 +896,9 @@ graph TB
 
 ### 7.1 Parking Spot Management
 
+<details>
+<summary>class Enum</summary>
+
 ```cpp
 #include <string>
 #include <vector>
@@ -1140,8 +1143,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 7.2 Parking Transaction Manager
+
+<details>
+<summary>ParkingTransaction Struct</summary>
 
 ```cpp
 struct ParkingTransaction {
@@ -1322,8 +1330,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 7.3 Fee Calculator
+
+<details>
+<summary>PricingConfig Struct</summary>
 
 ```cpp
 struct PricingConfig {
@@ -1402,8 +1415,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 7.4 Complete Parking Lot System
+
+<details>
+<summary>ParkingLotSystem Class</summary>
 
 ```cpp
 class ParkingLotSystem {
@@ -1504,6 +1522,8 @@ int main() {
 }
 ```
 
+</details>
+
 
 ***
 
@@ -1514,6 +1534,9 @@ int main() {
 **Problem:** Entry processing takes 72 seconds (target: <5 seconds)
 
 **Solution: Pre-processing \& Fast Lanes**
+
+<details>
+<summary>OptimizedEntrySystem Class</summary>
 
 ```cpp
 class OptimizedEntrySystem {
@@ -1541,12 +1564,17 @@ public:
 // Average: 0.8×1 + 0.15×2 + 0.05×5 = 1.35 seconds
 ```
 
+</details>
+
 
 ### Bottleneck 2: Database Load During Peak Hours
 
 **Problem:** 200 vehicles/hour = 3.3 vehicles/minute = frequent DB writes
 
 **Solution: Write Batching**
+
+<details>
+<summary>BatchedTransactionWriter Class</summary>
 
 ```cpp
 class BatchedTransactionWriter {
@@ -1579,6 +1607,8 @@ private:
 
 // Result: 200 individual writes → 4 batch writes (98% reduction)
 ```
+
+</details>
 
 
 ### Bottleneck 3: LPR Accuracy in Low Light

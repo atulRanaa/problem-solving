@@ -851,6 +851,9 @@ graph TB
 
 ### 7.1 Inventory Manager (Optimistic Locking)
 
+<details>
+<summary>RoomInventory Struct</summary>
+
 ```cpp
 #include <string>
 #include <optional>
@@ -1031,8 +1034,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 7.2 Reservation Hold Manager
+
+<details>
+<summary>ReservationHold Struct</summary>
 
 ```cpp
 struct ReservationHold {
@@ -1220,8 +1228,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 7.3 Booking Service
+
+<details>
+<summary>BookingService Class</summary>
 
 ```cpp
 class BookingService {
@@ -1387,8 +1400,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 7.4 Complete Hotel Booking System
+
+<details>
+<summary>HotelBookingSystem Class</summary>
 
 ```cpp
 class HotelBookingSystem {
@@ -1510,6 +1528,8 @@ int main() {
     return 0;
 }
 ```
+
+</details>
 
 
 ***

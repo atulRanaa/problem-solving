@@ -1079,6 +1079,9 @@ graph TB
 
 ### 7.1 Geospatial Data Structures
 
+<details>
+<summary>S2CellId Struct</summary>
+
 ```cpp
 #include <cmath>
 #include <vector>
@@ -1290,8 +1293,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 7.2 Location Service
+
+<details>
+<summary>LocationService Class</summary>
 
 ```cpp
 class LocationService {
@@ -1390,10 +1398,15 @@ public:
 };
 ```
 
+</details>
+
 
 ## Step 7: Core Implementation (C++) - Part 2
 
 ### 7.3 Driver-Rider Matching Service
+
+<details>
+<summary>RideRequest Struct</summary>
 
 ```cpp
 #include <queue>
@@ -1650,8 +1663,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 7.4 Surge Pricing Engine
+
+<details>
+<summary>DemandSupplyStats Struct</summary>
 
 ```cpp
 #include <unordered_map>
@@ -1906,8 +1924,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 7.5 Fare Calculator
+
+<details>
+<summary>FareBreakdown Struct</summary>
 
 ```cpp
 struct FareBreakdown {
@@ -2029,8 +2052,13 @@ public:
 };
 ```
 
+</details>
+
 
 ### 7.6 Complete Ride-Hailing System
+
+<details>
+<summary>UberSystem Class</summary>
 
 ```cpp
 class UberSystem {
@@ -2203,12 +2231,17 @@ int main() {
 }
 ```
 
+</details>
+
 
 ***
 
 ## Step 8: Advanced Features
 
 ### 8.1 Pool (Shared Rides) Matching
+
+<details>
+<summary>PoolMatchingService Class</summary>
 
 ```cpp
 class PoolMatchingService {
@@ -2253,8 +2286,13 @@ public:
 };
 ```
 
+</details>
+
 
 ### 8.2 Dynamic Pricing with ML
+
+<details>
+<summary>MLPricingModel Class</summary>
 
 ```cpp
 class MLPricingModel {
@@ -2299,6 +2337,8 @@ private:
 };
 ```
 
+</details>
+
 
 ***
 
@@ -2309,6 +2349,9 @@ private:
 **Problem:** 1.76M drivers × 1 update per 5 sec = 352K writes/sec
 
 **Solution: Batch Updates + Compression**
+
+<details>
+<summary>BatchedLocationService Class</summary>
 
 ```cpp
 class BatchedLocationService {
@@ -2355,12 +2398,17 @@ private:
 // Result: 352K individual writes → 352 batch writes (1000x reduction)
 ```
 
+</details>
+
 
 ### Bottleneck 2: Geospatial Query Performance
 
 **Problem:** Finding nearby drivers for 324 requests/sec
 
 **Solution: Spatial Indexing + Caching**
+
+<details>
+<summary>CachedGeoIndex Class</summary>
 
 ```cpp
 class CachedGeoIndex {
@@ -2399,12 +2447,17 @@ public:
 // 10ms → 1ms average query time
 ```
 
+</details>
+
 
 ### Bottleneck 3: Database Writes for Trip Updates
 
 **Problem:** 5 status updates per trip × 324 TPS = 1,620 writes/sec
 
 **Solution: Event Sourcing**
+
+<details>
+<summary>TripEventStore Class</summary>
 
 ```cpp
 class TripEventStore {
@@ -2440,6 +2493,8 @@ public:
 
 // Benefit: Write throughput 10x higher (append-only)
 ```
+
+</details>
 
 
 ***

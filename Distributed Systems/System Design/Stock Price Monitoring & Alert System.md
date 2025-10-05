@@ -646,6 +646,9 @@ Kafka (alert-triggered) → Notification Worker
 
 ### Approach 1: Brute Force (Naive)
 
+<details>
+<summary>C++ Code</summary>
+
 ```cpp
 // For each price update, query all rules for that stock
 vector<Alert> findTriggeredAlerts(int stock_id, double new_price) {
@@ -665,6 +668,8 @@ vector<Alert> findTriggeredAlerts(int stock_id, double new_price) {
 }
 ```
 
+</details>
+
 **Analysis:**
 
 - **Time Complexity:** O(N) per price update, where N = rules per stock (avg 250)
@@ -674,6 +679,9 @@ vector<Alert> findTriggeredAlerts(int stock_id, double new_price) {
 
 
 ### Approach 2: In-Memory Hash Map
+
+<details>
+<summary>InMemoryRuleEngine Class</summary>
 
 ```cpp
 // Load all rules into memory at startup
@@ -711,6 +719,8 @@ public:
 };
 ```
 
+</details>
+
 **Analysis:**
 
 - **Time Complexity:** O(N) per price, but in-memory (fast)
@@ -723,6 +733,9 @@ public:
 ### Approach 3: Indexed Range Queries (Optimal)
 
 **Key Insight:** Most price changes don't trigger alerts. We only need to check rules whose thresholds are crossed by the price movement.
+
+<details>
+<summary>IndexedRuleEngine Class</summary>
 
 ```cpp
 class IndexedRuleEngine {
@@ -805,6 +818,8 @@ public:
 };
 ```
 
+</details>
+
 **Analysis:**
 
 - **Time Complexity:** O(log N + K) where K = rules triggered (usually <<< N)
@@ -835,6 +850,9 @@ Only evaluate rule_3 and rule_4 (2 rules instead of all 250)
 **Challenge:** Single-machine can't handle 2.5M evaluations/sec at peak.
 
 **Solution:** Partition rules across multiple consumer instances using Kafka consumer groups.
+
+<details>
+<summary>DistributedRuleEvaluator Class</summary>
 
 ```cpp
 class DistributedRuleEvaluator {
@@ -872,6 +890,8 @@ public:
 };
 ```
 
+</details>
+
 **Partitioning Strategy:**
 
 ```
@@ -896,6 +916,9 @@ Per-instance: 250K / 1K stocks = 250 evals/stock (manageable)
 
 **Percentage Change Rules:**
 
+<details>
+<summary>C++ Code</summary>
+
 ```cpp
 bool evaluatePercentageRule(const AlertRule& rule, double new_price) {
     double baseline = rule.baseline_price;  // User-set or dynamic
@@ -917,7 +940,12 @@ bool evaluatePercentageRule(const AlertRule& rule, double new_price) {
 // change: ($165 - $175) / $175 = -5.71% ← Triggers!
 ```
 
+</details>
+
 **Moving Average Rules:**
+
+<details>
+<summary>C++ Code</summary>
 
 ```cpp
 bool evaluateMovingAverageRule(
@@ -952,6 +980,8 @@ bool evaluateMovingAverageRule(
     return false;
 }
 ```
+
+</details>
 
 **Pre-computing Moving Averages (Kafka Streams):**
 
@@ -996,6 +1026,9 @@ prices
 
 **Decision:** In-memory engine + periodic sync from PostgreSQL
 
+<details>
+<summary>C++ Code</summary>
+
 ```cpp
 // Sync rules every 30 seconds
 void syncRulesFromDatabase() {
@@ -1016,6 +1049,8 @@ void syncRulesFromDatabase() {
 }
 ```
 
+</details>
+
 
 ***
 
@@ -1026,6 +1061,9 @@ void syncRulesFromDatabase() {
 **Challenge:** Email providers limit to 1K emails/sec, SMS providers 100/sec
 
 **Solution 1: Rate Limiting + Queueing**
+
+<details>
+<summary>RateLimitedNotifier Class</summary>
 
 ```cpp
 class RateLimitedNotifier {
@@ -1055,9 +1093,14 @@ public:
 };
 ```
 
+</details>
+
 **Solution 2: Notification Deduplication**
 
 Many alerts trigger multiple times (price bounces around threshold). Deduplicate within time window.
+
+<details>
+<summary>C++ Code</summary>
 
 ```cpp
 bool shouldSendNotification(const Alert& alert) {
@@ -1073,6 +1116,8 @@ bool shouldSendNotification(const Alert& alert) {
     return true;
 }
 ```
+
+</details>
 
 **Trade-off:** Notification freshness vs spam prevention
 
@@ -1102,6 +1147,9 @@ Per-server resources:
 
 Instead of sending individual updates, batch by symbol:
 
+<details>
+<summary>C++ Code</summary>
+
 ```cpp
 // Inefficient: Send each price individually
 for (const auto& subscriber : subscribers) {
@@ -1130,6 +1178,8 @@ void batchedBroadcast() {
 }
 ```
 
+</details>
+
 **Trade-off:** Latency (100ms delay) vs throughput (10x fewer messages)
 
 ***
@@ -1139,6 +1189,9 @@ void batchedBroadcast() {
 **Problem:** 585M alerts/day = 6.7K writes/sec to alert_history
 
 **Solution 1: Write Batching**
+
+<details>
+<summary>BatchedHistoryWriter Class</summary>
 
 ```cpp
 class BatchedHistoryWriter {
@@ -1163,6 +1216,8 @@ public:
     }
 };
 ```
+
+</details>
 
 **Solution 2: Asynchronous Writes**
 
@@ -1193,6 +1248,9 @@ CREATE TABLE alert_history_2025_11 ...
 
 **Solution: Back Pressure Handling**
 
+<details>
+<summary>PriceIngestionService Class</summary>
+
 ```cpp
 class PriceIngestionService {
 private:
@@ -1219,7 +1277,12 @@ public:
 };
 ```
 
+</details>
+
 **Alternative: Sampling**
+
+<details>
+<summary>C++ Code</summary>
 
 ```cpp
 // During high load, sample every Nth update
@@ -1227,6 +1290,8 @@ if (high_load && update_count % 10 != 0) {
     return;  // Skip 9 out of 10 updates
 }
 ```
+
+</details>
 
 **Trade-off:** Data completeness vs system stability
 
@@ -1249,6 +1314,9 @@ Read path:
 3. On miss: Query L3 PostgreSQL (10ms)
 4. Update L1 and L2
 ```
+
+<details>
+<summary>C++ Code</summary>
 
 ```cpp
 double getStockPrice(int stock_id) {
@@ -1273,6 +1341,8 @@ double getStockPrice(int stock_id) {
 }
 ```
 
+</details>
+
 
 ***
 
@@ -1281,6 +1351,9 @@ double getStockPrice(int stock_id) {
 **Problem:** Price oscillates around threshold (e.g., \$180.00 ↔ \$179.99), triggering spam
 
 **Solution: Cooldown + Hysteresis**
+
+<details>
+<summary>AlertRule Struct</summary>
 
 ```cpp
 struct AlertRule {
@@ -1306,6 +1379,8 @@ bool shouldTrigger(const AlertRule& rule, double price) {
     return false;
 }
 ```
+
+</details>
 
 **Trade-off:** Missed alerts (rare edge case) vs user experience
 

@@ -466,6 +466,9 @@ graph TB
 
 ### 7.1 Trie Data Structure
 
+<details>
+<summary>TrieNode Struct</summary>
+
 ```cpp
 #include <iostream>
 #include <memory>
@@ -670,12 +673,17 @@ int main() {
 }
 ```
 
+</details>
+
 
 ### 7.2 Optimized Trie with Top-K at Each Node
 
 **Problem:** Collecting all words is slow for popular prefixes
 
 **Solution:** Store top K suggestions at each node
+
+<details>
+<summary>OptimizedTrieNode Struct</summary>
 
 ```cpp
 struct OptimizedTrieNode {
@@ -802,8 +810,13 @@ public:
 // Trade-off: More memory (K × nodes) vs faster queries
 ```
 
+</details>
+
 
 ### 7.3 Distributed Trie (Sharding)
+
+<details>
+<summary>DistributedAutocomplete Class</summary>
 
 ```cpp
 #include <functional>
@@ -891,8 +904,13 @@ public:
 };
 ```
 
+</details>
+
 
 ### 7.4 Caching Layer
+
+<details>
+<summary>AutocompleteCache Class</summary>
 
 ```cpp
 #include <chrono>
@@ -989,8 +1007,13 @@ public:
 };
 ```
 
+</details>
+
 
 ### 7.5 Complete Autocomplete Service
+
+<details>
+<summary>AutocompleteService Class</summary>
 
 ```cpp
 class AutocompleteService {
@@ -1130,12 +1153,17 @@ int main() {
 }
 ```
 
+</details>
+
 
 ***
 
 ## Step 8: Data Collection \& Aggregation
 
 ### 8.1 Query Logging
+
+<details>
+<summary>QueryLogger Class</summary>
 
 ```cpp
 #include <kafka/KafkaProducer.h>
@@ -1161,8 +1189,13 @@ public:
 };
 ```
 
+</details>
+
 
 ### 8.2 Real-Time Aggregation (Apache Flink)
+
+<details>
+<summary>QueryAggregator Class</summary>
 
 ```cpp
 // Pseudo-code for Flink job
@@ -1203,6 +1236,8 @@ class CountAggregator {
 };
 ```
 
+</details>
+
 
 ***
 
@@ -1227,6 +1262,9 @@ Space savings: 4x compression
 
 ### Optimization 2: Bloom Filter for Negative Lookups
 
+<details>
+<summary>BloomFilterAutocomplete Class</summary>
+
 ```cpp
 class BloomFilterAutocomplete {
 private:
@@ -1249,8 +1287,13 @@ public:
 // Saves 99% of trie lookups for non-existent prefixes
 ```
 
+</details>
+
 
 ### Optimization 3: Lazy Loading (Swap to Disk)
+
+<details>
+<summary>DiskBackedTrie Class</summary>
 
 ```cpp
 class DiskBackedTrie {
@@ -1288,8 +1331,13 @@ public:
 // Memory savings: 10x reduction
 ```
 
+</details>
+
 
 ### Optimization 4: Personalization
+
+<details>
+<summary>PersonalizedAutocomplete Class</summary>
 
 ```cpp
 class PersonalizedAutocomplete {
@@ -1337,10 +1385,15 @@ public:
 };
 ```
 
+</details>
+
 
 ***
 
 ## Step 10: Monitoring \& Metrics
+
+<details>
+<summary>AutocompleteMetrics Class</summary>
 
 ```cpp
 class AutocompleteMetrics {
@@ -1392,6 +1445,8 @@ public:
     }
 };
 ```
+
+</details>
 
 
 ***

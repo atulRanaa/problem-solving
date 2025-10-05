@@ -511,6 +511,9 @@ Disadvantages:
 
 **Implementation:**
 
+<details>
+<summary>GeoLocation Struct</summary>
+
 ```cpp
 #include <string>
 #include <vector>
@@ -617,6 +620,8 @@ public:
 };
 ```
 
+</details>
+
 
 ### 6.2 Edge Server Cache Implementation
 
@@ -645,6 +650,9 @@ public:
 ```
 
 **Cache Implementation:**
+
+<details>
+<summary>CacheEntry Struct</summary>
 
 ```cpp
 #include <unordered_map>
@@ -848,10 +856,15 @@ private:
 };
 ```
 
+</details>
+
 
 ### 6.3 Cache Invalidation / Purge
 
 **Purge Strategies:**
+
+<details>
+<summary>CachePurgeManager Class</summary>
 
 ```cpp
 #include <set>
@@ -973,6 +986,8 @@ public:
 };
 ```
 
+</details>
+
 
 ### 6.4 Origin Pull \& Request Coalescing
 
@@ -992,6 +1007,9 @@ With coalescing:
 ```
 
 **Implementation:**
+
+<details>
+<summary>OriginPullManager Class</summary>
 
 ```cpp
 #include <future>
@@ -1069,6 +1087,8 @@ private:
 };
 ```
 
+</details>
+
 
 ### 6.5 Origin Shield (Mid-Tier Cache)
 
@@ -1086,6 +1106,9 @@ Shield hit ratio: 90%
 ```
 
 **Implementation:**
+
+<details>
+<summary>OriginShieldManager Class</summary>
 
 ```cpp
 class OriginShieldManager {
@@ -1133,6 +1156,8 @@ private:
 };
 ```
 
+</details>
+
 
 ***
 
@@ -1154,6 +1179,9 @@ private:
 
 
 ### 7.2 Image Optimization
+
+<details>
+<summary>ImageOptimizer Class</summary>
 
 ```cpp
 class ImageOptimizer {
@@ -1197,6 +1225,8 @@ std::vector<uint8_t> serveOptimizedImage(const std::string& url,
 }
 ```
 
+</details>
+
 
 ### 7.3 Video Streaming (HLS/DASH)
 
@@ -1223,6 +1253,9 @@ Player automatically switches based on network speed
 
 
 ### 7.4 Edge Computing (Serverless at Edge)
+
+<details>
+<summary>EdgeFunction Class</summary>
 
 ```cpp
 // Run code at edge for dynamic content
@@ -1264,6 +1297,8 @@ std::string handleRequest(const HttpRequest& request) {
 }
 ```
 
+</details>
+
 
 ***
 
@@ -1274,6 +1309,9 @@ std::string handleRequest(const HttpRequest& request) {
 **Problem:** New PoP has empty cache → 100% cache miss
 
 **Solution: Cache Warming**
+
+<details>
+<summary>CacheWarmer Class</summary>
 
 ```cpp
 class CacheWarmer {
@@ -1301,10 +1339,15 @@ public:
 };
 ```
 
+</details>
+
 
 ### Bottleneck 2: Origin Overload
 
 **Solution: Rate Limiting + Circuit Breaker**
+
+<details>
+<summary>OriginCircuitBreaker Class</summary>
 
 ```cpp
 class OriginCircuitBreaker {
@@ -1357,10 +1400,15 @@ public:
 };
 ```
 
+</details>
+
 
 ### Bottleneck 3: Large File Downloads
 
 **Solution: Range Requests + Byte Serving**
+
+<details>
+<summary>RangeRequestHandler Class</summary>
 
 ```cpp
 class RangeRequestHandler {
@@ -1421,10 +1469,15 @@ public:
 // - Seek in video files
 ```
 
+</details>
+
 
 ***
 
 ## Step 9: Monitoring \& Analytics
+
+<details>
+<summary>CDNMetrics Class</summary>
 
 ```cpp
 class CDNMetrics {
@@ -1479,6 +1532,8 @@ public:
     }
 };
 ```
+
+</details>
 
 
 ***

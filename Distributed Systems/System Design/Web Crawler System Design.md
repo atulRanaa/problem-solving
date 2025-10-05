@@ -508,21 +508,21 @@ CREATE TABLE urls (
     url TEXT UNIQUE NOT NULL,
     url_hash VARCHAR(64) UNIQUE,  -- SHA256 for fast lookup
     domain VARCHAR(255),
-    
+
     -- Crawl status
     status VARCHAR(20) DEFAULT 'pending',  -- pending, crawled, failed, skipped
     priority INT DEFAULT 5,
     depth INT DEFAULT 0,
-    
+
     -- Timestamps
     discovered_at TIMESTAMPTZ DEFAULT NOW(),
     last_crawled_at TIMESTAMPTZ,
     next_crawl_at TIMESTAMPTZ,
-    
+
     -- Metadata
     parent_url_id BIGINT REFERENCES urls(url_id),
     crawl_id VARCHAR(50),
-    
+
     INDEX idx_status_priority (status, priority DESC),
     INDEX idx_domain (domain),
     INDEX idx_url_hash (url_hash),
@@ -533,26 +533,26 @@ CREATE TABLE urls (
 CREATE TABLE pages (
     page_id BIGSERIAL PRIMARY KEY,
     url_id BIGINT REFERENCES urls(url_id),
-    
+
     -- HTTP response
     status_code INT,
     content_type VARCHAR(100),
     content_length INT,
-    
+
     -- Content
     content_hash VARCHAR(64),  -- For deduplication
     html_key VARCHAR(500),  -- S3 key
     text_key VARCHAR(500),  -- Extracted text S3 key
-    
+
     -- Metadata
     title TEXT,
     description TEXT,
     language VARCHAR(10),
-    
+
     -- Timing
     crawled_at TIMESTAMPTZ DEFAULT NOW(),
     download_time_ms INT,
-    
+
     INDEX idx_content_hash (content_hash),
     INDEX idx_crawled_at (crawled_at DESC)
 ) PARTITION BY RANGE (crawled_at);
@@ -566,9 +566,9 @@ CREATE TABLE links (
     target_url_id BIGINT REFERENCES urls(url_id),
     anchor_text TEXT,
     rel VARCHAR(50),  -- nofollow, noopener, etc.
-    
+
     created_at TIMESTAMPTZ DEFAULT NOW(),
-    
+
     PRIMARY KEY (source_url_id, target_url_id),
     INDEX idx_target (target_url_id)
 );
@@ -579,7 +579,7 @@ CREATE TABLE robots_txt (
     content TEXT,
     fetched_at TIMESTAMPTZ DEFAULT NOW(),
     expires_at TIMESTAMPTZ,
-    
+
     INDEX idx_expires (expires_at)
 );
 
@@ -587,32 +587,32 @@ CREATE TABLE robots_txt (
 CREATE TABLE crawl_jobs (
     crawl_id VARCHAR(50) PRIMARY KEY,
     status VARCHAR(20) DEFAULT 'pending',
-    
+
     seed_urls JSONB,
     config JSONB,
-    
+
     pages_crawled INT DEFAULT 0,
     pages_queued INT DEFAULT 0,
     bytes_downloaded BIGINT DEFAULT 0,
-    
+
     started_at TIMESTAMPTZ,
     completed_at TIMESTAMPTZ,
-    
+
     INDEX idx_status (status)
 );
 
 -- Domain metadata (for politeness)
 CREATE TABLE domains (
     domain VARCHAR(255) PRIMARY KEY,
-    
+
     -- Rate limiting
     crawl_delay DECIMAL(5,2) DEFAULT 1.0,  -- seconds
     last_request_at TIMESTAMPTZ,
-    
+
     -- Statistics
     pages_crawled INT DEFAULT 0,
     total_size_bytes BIGINT DEFAULT 0,
-    
+
     -- Health
     error_rate DECIMAL(5,4) DEFAULT 0,
     is_blocked BOOLEAN DEFAULT FALSE
@@ -656,95 +656,95 @@ graph TB
     subgraph "Seed URLs"
         SEEDS[Seed URLs<br/>example.com<br/>news.com]
     end
-    
+
     subgraph "Crawler Coordinator"
         COORDINATOR[Coordinator<br/>Job management<br/>Load balancing]
-        
+
         SCHEDULER[Scheduler<br/>Priority assignment<br/>Re-crawl frequency]
     end
-    
+
     subgraph "URL Frontier (Distributed Queue)"
         PRIORITY_Q[Priority Queues<br/>High/Medium/Low<br/>Redis Sorted Sets]
-        
+
         POLITENESS[Politeness Manager<br/>Per-domain queues<br/>Rate limiting]
     end
-    
+
     subgraph "Crawler Workers (100 machines)"
         WORKER1[Worker 1<br/>500 threads<br/>110K pages/sec]
         WORKER2[Worker 2<br/>500 threads]
         WORKER3[Worker 3<br/>500 threads]
         WORKERN[Worker N<br/>500 threads]
     end
-    
+
     subgraph "Download & Parse"
         DNS[DNS Resolver<br/>10 GB cache<br/>100M domains]
-        
+
         DOWNLOADER[HTTP Downloader<br/>Async I/O<br/>Connection pooling]
-        
+
         PARSER[HTML Parser<br/>Link extraction<br/>Content extraction]
-        
+
         ROBOTS[Robots.txt Handler<br/>100 GB cache<br/>Rule checking]
     end
-    
+
     subgraph "Deduplication"
         URL_DEDUP[URL Deduplication<br/>Bloom filter<br/>5 GB per worker]
-        
+
         CONTENT_DEDUP[Content Deduplication<br/>SHA256 hashing<br/>30-40% savings]
     end
-    
+
     subgraph "Storage Layer"
         PG_MASTER[(PostgreSQL Master<br/>URLs, Metadata<br/>50 TB)]
-        
+
         PG_REPLICA[(PostgreSQL Replicas<br/>Read scaling<br/>10 replicas)]
-        
+
         S3_HTML[S3 - Raw HTML<br/>17.28 PB/day<br/>Compressed]
-        
+
         S3_TEXT[S3 - Extracted Text<br/>432 TB/day<br/>Searchable]
-        
+
         REDIS[Redis Cluster<br/>URL frontier<br/>Visited URLs<br/>200 GB]
-        
+
         ES[Elasticsearch<br/>Full-text index<br/>Search engine]
     end
-    
+
     subgraph "Analytics & Monitoring"
         METRICS[Prometheus<br/>Pages/sec<br/>Bandwidth<br/>Errors]
-        
+
         DASHBOARD[Grafana<br/>Real-time stats<br/>Alerts]
-        
+
         LOGS[ELK Stack<br/>Crawl logs<br/>Error tracking]
     end
-    
+
     SEEDS --> COORDINATOR
     COORDINATOR --> SCHEDULER
     SCHEDULER --> PRIORITY_Q
-    
+
     PRIORITY_Q --> POLITENESS
     POLITENESS --> WORKER1 & WORKER2 & WORKER3 & WORKERN
-    
+
     WORKER1 --> DNS
     DNS --> DOWNLOADER
     DOWNLOADER --> ROBOTS
     ROBOTS --> DOWNLOADER
-    
+
     DOWNLOADER --> PARSER
     PARSER --> URL_DEDUP
     PARSER --> CONTENT_DEDUP
-    
+
     URL_DEDUP --> PRIORITY_Q
     CONTENT_DEDUP --> S3_HTML
     CONTENT_DEDUP --> S3_TEXT
-    
+
     PARSER --> PG_MASTER
     PG_MASTER --> PG_REPLICA
-    
+
     WORKER1 --> REDIS
-    
+
     S3_TEXT --> ES
-    
+
     WORKER1 --> METRICS
     METRICS --> DASHBOARD
     WORKER1 --> LOGS
-    
+
     style PRIORITY_Q fill:#90EE90
     style REDIS fill:#dc382d
     style DOWNLOADER fill:#ffa500
@@ -757,6 +757,12 @@ graph TB
 ## Step 7: Core Implementation (C++)
 
 ### 7.1 URL Frontier (Priority Queue)
+
+<details>
+<summary>URL Frontier Implementation</summary>
+
+<details>
+<summary>URL Struct</summary>
 
 ```cpp
 #include <string>
@@ -789,22 +795,22 @@ private:
     // Priority queue for URLs
     std::priority_queue<URL, std::vector<URL>, URLComparator> frontier_;
     std::mutex frontier_mtx_;
-    
+
     // Per-domain queues for politeness
     std::unordered_map<std::string, std::queue<URL>> domain_queues_;
     std::unordered_map<std::string, std::chrono::system_clock::time_point> domain_last_access_;
     std::mutex domain_mtx_;
-    
+
     // Visited URLs (Bloom filter simulation)
     std::unordered_set<std::string> visited_urls_;
     std::mutex visited_mtx_;
-    
+
     double crawl_delay_seconds_;
-    
+
 public:
-    URLFrontier(double crawl_delay = 1.0) 
+    URLFrontier(double crawl_delay = 1.0)
         : crawl_delay_seconds_(crawl_delay) {}
-    
+
     void addURL(const URL& url) {
         // Check if already visited
         {
@@ -813,77 +819,77 @@ public:
                 return;  // Skip duplicate
             }
         }
-        
+
         // Add to priority queue
         {
             std::lock_guard<std::mutex> lock(frontier_mtx_);
             frontier_.push(url);
         }
-        
-        std::cout << "  Added to frontier: " << url.url 
+
+        std::cout << "  Added to frontier: " << url.url
                  << " (priority: " << url.priority << ")" << std::endl;
     }
-    
+
     std::optional<URL> getNextURL() {
         std::unique_lock<std::mutex> frontier_lock(frontier_mtx_);
-        
+
         // Try to find a URL that respects politeness
         while (!frontier_.empty()) {
             URL url = frontier_.top();
             frontier_.pop();
             frontier_lock.unlock();
-            
+
             // Check if we can crawl this domain now
             if (canCrawlDomain(url.domain)) {
                 markURLVisited(url.url);
                 updateDomainAccess(url.domain);
                 return url;
             }
-            
+
             // Re-queue for later
             {
                 std::lock_guard<std::mutex> domain_lock(domain_mtx_);
                 domain_queues_[url.domain].push(url);
             }
-            
+
             frontier_lock.lock();
         }
-        
+
         return std::nullopt;
     }
-    
+
     size_t size() {
         std::lock_guard<std::mutex> lock(frontier_mtx_);
         return frontier_.size();
     }
-    
+
     bool isEmpty() {
         std::lock_guard<std::mutex> lock(frontier_mtx_);
         return frontier_.empty();
     }
-    
+
 private:
     bool canCrawlDomain(const std::string& domain) {
         std::lock_guard<std::mutex> lock(domain_mtx_);
-        
+
         auto it = domain_last_access_.find(domain);
         if (it == domain_last_access_.end()) {
             return true;  // Never crawled before
         }
-        
+
         auto now = std::chrono::system_clock::now();
         auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(
             now - it->second
         ).count();
-        
+
         return elapsed >= crawl_delay_seconds_;
     }
-    
+
     void updateDomainAccess(const std::string& domain) {
         std::lock_guard<std::mutex> lock(domain_mtx_);
         domain_last_access_[domain] = std::chrono::system_clock::now();
     }
-    
+
     void markURLVisited(const std::string& url) {
         std::lock_guard<std::mutex> lock(visited_mtx_);
         visited_urls_.insert(url);
@@ -891,8 +897,18 @@ private:
 };
 ```
 
+</details>
+
+</details>
+
 
 ### 7.2 Robots.txt Handler
+
+<details>
+<summary>Robots.txt Handler Implementation</summary>
+
+<details>
+<summary>RobotRule Struct</summary>
 
 ```cpp
 #include <map>
@@ -910,19 +926,19 @@ class RobotsTxtHandler {
 private:
     std::unordered_map<std::string, RobotRule> rules_cache_;
     std::mutex cache_mtx_;
-    
+
 public:
     bool canCrawl(const std::string& url, const std::string& user_agent) {
         std::string domain = extractDomain(url);
         std::string path = extractPath(url);
-        
+
         // Get or fetch robots.txt
         auto rule = getRules(domain, user_agent);
-        
+
         if (!rule) {
             return true;  // No robots.txt = allow all
         }
-        
+
         // Check disallowed paths
         for (const auto& disallowed : rule->disallowed_paths) {
             if (path.find(disallowed) == 0) {
@@ -930,17 +946,17 @@ public:
                 return false;
             }
         }
-        
+
         return true;
     }
-    
+
     double getCrawlDelay(const std::string& domain, const std::string& user_agent) {
         auto rule = getRules(domain, user_agent);
         return rule ? rule->crawl_delay : 1.0;
     }
-    
+
 private:
-    std::optional<RobotRule> getRules(const std::string& domain, 
+    std::optional<RobotRule> getRules(const std::string& domain,
                                       const std::string& user_agent) {
         // Check cache
         {
@@ -950,47 +966,47 @@ private:
                 return it->second;
             }
         }
-        
+
         // Fetch and parse robots.txt
         std::string robots_url = "https://" + domain + "/robots.txt";
         std::string content = fetchRobotsTxt(robots_url);
-        
+
         if (content.empty()) {
             return std::nullopt;
         }
-        
+
         RobotRule rule = parseRobotsTxt(content, user_agent);
-        
+
         // Cache
         {
             std::lock_guard<std::mutex> lock(cache_mtx_);
             rules_cache_[domain] = rule;
         }
-        
+
         return rule;
     }
-    
-    RobotRule parseRobotsTxt(const std::string& content, 
+
+    RobotRule parseRobotsTxt(const std::string& content,
                             const std::string& user_agent) {
         RobotRule rule;
         rule.user_agent = user_agent;
         rule.crawl_delay = 1.0;
-        
+
         std::istringstream stream(content);
         std::string line;
         bool matching_agent = false;
-        
+
         while (std::getline(stream, line)) {
             // Trim whitespace
             line.erase(0, line.find_first_not_of(" \t\r\n"));
             line.erase(line.find_last_not_of(" \t\r\n") + 1);
-            
+
             if (line.empty() || line[^0] == '#') continue;
-            
+
             if (line.find("User-agent:") == 0) {
                 std::string agent = line.substr(11);
                 agent.erase(0, agent.find_first_not_of(" "));
-                
+
                 matching_agent = (agent == "*" || agent == user_agent);
             }
             else if (matching_agent && line.find("Disallow:") == 0) {
@@ -1006,10 +1022,10 @@ private:
                 rule.crawl_delay = std::stod(delay_str);
             }
         }
-        
+
         return rule;
     }
-    
+
     std::string fetchRobotsTxt(const std::string& url) {
         // Simplified: In production, use HTTP client
         // Return example robots.txt
@@ -1018,7 +1034,7 @@ Disallow: /admin/
 Disallow: /private/
 Crawl-delay: 1)";
     }
-    
+
     std::string extractDomain(const std::string& url) {
         // Extract domain from URL
         size_t start = url.find("://");
@@ -1027,15 +1043,15 @@ Crawl-delay: 1)";
         } else {
             start = 0;
         }
-        
+
         size_t end = url.find('/', start);
         if (end == std::string::npos) {
             end = url.length();
         }
-        
+
         return url.substr(start, end - start);
     }
-    
+
     std::string extractPath(const std::string& url) {
         size_t start = url.find("://");
         if (start != std::string::npos) {
@@ -1043,18 +1059,25 @@ Crawl-delay: 1)";
         } else {
             start = url.find('/');
         }
-        
+
         if (start == std::string::npos) {
             return "/";
         }
-        
+
         return url.substr(start);
     }
 };
 ```
 
+</details>
+
+</details>
+
 
 ### 7.3 HTML Parser \& Link Extractor
+
+<details>
+<summary>ParsedPage Struct</summary>
 
 ```cpp
 #include <regex>
@@ -1073,136 +1096,136 @@ public:
     ParsedPage parse(const std::string& url, const std::string& html) {
         std::cout << "\n=== Parsing Page ===" << std::endl;
         std::cout << "URL: " << url << std::endl;
-        
+
         ParsedPage page;
         page.url = url;
         page.size_bytes = html.size();
-        
+
         // Extract title
         page.title = extractTitle(html);
-        
+
         // Extract text content (remove HTML tags)
         page.content = extractText(html);
-        
+
         // Extract links
         page.links = extractLinks(html, url);
-        
+
         // Compute content hash
         page.content_hash = computeHash(page.content);
-        
+
         std::cout << "  Title: " << page.title << std::endl;
         std::cout << "  Content size: " << page.content.size() << " bytes" << std::endl;
         std::cout << "  Links found: " << page.links.size() << std::endl;
         std::cout << "  Hash: " << page.content_hash.substr(0, 16) << "..." << std::endl;
-        
+
         return page;
     }
-    
+
 private:
     std::string extractTitle(const std::string& html) {
-        std::regex title_regex("<title>(.*?)</title>", 
+        std::regex title_regex("<title>(.*?)</title>",
                               std::regex_constants::icase);
         std::smatch match;
-        
+
         if (std::regex_search(html, match, title_regex)) {
             return match[^1].str();
         }
-        
+
         return "";
     }
-    
+
     std::string extractText(const std::string& html) {
         // Simplified: Remove HTML tags
         std::string text = html;
-        
+
         // Remove script and style tags
         std::regex script_regex("<script[^>]*>.*?</script>",
                                std::regex_constants::icase);
         text = std::regex_replace(text, script_regex, "");
-        
+
         std::regex style_regex("<style[^>]*>.*?</style>",
                               std::regex_constants::icase);
         text = std::regex_replace(text, style_regex, "");
-        
+
         // Remove all HTML tags
         std::regex tag_regex("<[^>]*>");
         text = std::regex_replace(text, tag_regex, "");
-        
+
         // Decode HTML entities (simplified)
         text = std::regex_replace(text, std::regex("&nbsp;"), " ");
         text = std::regex_replace(text, std::regex("&amp;"), "&");
         text = std::regex_replace(text, std::regex("&lt;"), "<");
         text = std::regex_replace(text, std::regex("&gt;"), ">");
-        
+
         return text;
     }
-    
-    std::vector<std::string> extractLinks(const std::string& html, 
+
+    std::vector<std::string> extractLinks(const std::string& html,
                                          const std::string& base_url) {
         std::vector<std::string> links;
-        
+
         // Extract <a href="..."> links
         std::regex link_regex("<a[^>]*href=[\"']([^\"']*)[\"'][^>]*>",
                              std::regex_constants::icase);
-        
+
         auto links_begin = std::sregex_iterator(html.begin(), html.end(), link_regex);
         auto links_end = std::sregex_iterator();
-        
+
         for (std::sregex_iterator i = links_begin; i != links_end; ++i) {
             std::smatch match = *i;
             std::string link = match[^1].str();
-            
+
             // Resolve relative URLs
             link = resolveURL(link, base_url);
-            
+
             // Filter valid URLs
             if (isValidURL(link)) {
                 links.push_back(link);
             }
         }
-        
+
         return links;
     }
-    
+
     std::string resolveURL(const std::string& link, const std::string& base_url) {
         // Absolute URL
         if (link.find("http://") == 0 || link.find("https://") == 0) {
             return link;
         }
-        
+
         // Protocol-relative URL
         if (link.find("//") == 0) {
             return "https:" + link;
         }
-        
+
         // Absolute path
         if (link.find('/') == 0) {
             size_t domain_end = base_url.find('/', 8);  // After https://
             std::string domain = base_url.substr(0, domain_end);
             return domain + link;
         }
-        
+
         // Relative path
         size_t last_slash = base_url.rfind('/');
         std::string base_path = base_url.substr(0, last_slash + 1);
         return base_path + link;
     }
-    
+
     bool isValidURL(const std::string& url) {
         // Basic validation
         if (url.empty()) return false;
         if (url.find("javascript:") == 0) return false;
         if (url.find("mailto:") == 0) return false;
         if (url.find('#') == 0) return false;  // Fragment-only
-        
+
         return true;
     }
-    
+
     std::string computeHash(const std::string& content) {
         // Simplified SHA256 (in production: use OpenSSL)
         std::hash<std::string> hasher;
         size_t hash = hasher(content);
-        
+
         char buffer[^17];
         sprintf(buffer, "%016zx", hash);
         return std::string(buffer);
@@ -1210,8 +1233,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 7.4 Crawler Worker
+
+<details>
+<summary>CrawlerWorker Class</summary>
 
 ```cpp
 class CrawlerWorker {
@@ -1220,25 +1248,25 @@ private:
     RobotsTxtHandler& robots_handler_;
     HTMLParser parser_;
     DatabaseConnection db_;
-    
+
     std::string user_agent_;
     int max_depth_;
-    
+
     std::atomic<int> pages_crawled_{0};
     std::atomic<long long> bytes_downloaded_{0};
-    
+
 public:
     CrawlerWorker(URLFrontier& frontier,
                  RobotsTxtHandler& robots,
                  DatabaseConnection& db,
                  const std::string& user_agent = "MyCrawler/1.0",
                  int max_depth = 5)
-        : frontier_(frontier), 
+        : frontier_(frontier),
           robots_handler_(robots),
           db_(db),
           user_agent_(user_agent),
           max_depth_(max_depth) {}
-    
+
     void crawl() {
         while (true) {
             // Get next URL from frontier
@@ -1247,65 +1275,65 @@ public:
                 std::cout << "No more URLs to crawl" << std::endl;
                 break;
             }
-            
+
             URL url = *url_opt;
-            
+
             std::cout << "\n=== Crawling URL ===" << std::endl;
             std::cout << "URL: " << url.url << std::endl;
             std::cout << "Priority: " << url.priority << std::endl;
             std::cout << "Depth: " << url.depth << std::endl;
-            
+
             // Check robots.txt
             if (!robots_handler_.canCrawl(url.url, user_agent_)) {
                 std::cout << "✗ Skipped (robots.txt)" << std::endl;
                 continue;
             }
-            
+
             // Download page
             std::string html = downloadPage(url.url);
             if (html.empty()) {
                 std::cout << "✗ Download failed" << std::endl;
                 continue;
             }
-            
+
             bytes_downloaded_ += html.size();
-            
+
             // Parse page
             ParsedPage page = parser_.parse(url.url, html);
-            
+
             // Check for duplicate content
             if (isDuplicateContent(page.content_hash)) {
                 std::cout << "  Duplicate content detected, skipping" << std::endl;
                 continue;
             }
-            
+
             // Store page
             storePage(page);
-            
+
             pages_crawled_++;
-            
+
             // Extract and queue links
             if (url.depth < max_depth_) {
                 queueLinks(page.links, url.url, url.depth + 1);
             }
-            
+
             std::cout << "✓ Crawled successfully" << std::endl;
             std::cout << "  Pages crawled: " << pages_crawled_ << std::endl;
             std::cout << "  Data downloaded: " << (bytes_downloaded_ / 1024 / 1024) << " MB" << std::endl;
-            
+
             // Politeness delay
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
     }
-    
+
     int getPagesCrawled() const { return pages_crawled_; }
     long long getBytesDownloaded() const { return bytes_downloaded_; }
-    
+
 private:
     std::string downloadPage(const std::string& url) {
         // Simulate HTTP download
         std::this_thread::sleep_for(std::chrono::milliseconds(200));
-        
+
         // Return sample HTML
         return R"(<!DOCTYPE html>
 <html>
@@ -1321,31 +1349,31 @@ private:
 </body>
 </html>)";
     }
-    
+
     bool isDuplicateContent(const std::string& content_hash) {
         // Check if content hash exists in database
         std::string query = "SELECT 1 FROM pages WHERE content_hash = ? LIMIT 1";
         auto result = db_.query(query, content_hash);
         return !result.empty();
     }
-    
+
     void storePage(const ParsedPage& page) {
         // Store in database
         std::string query = R"(
             INSERT INTO pages (url, title, content_hash, size_bytes, crawled_at)
             VALUES (?, ?, ?, ?, NOW())
         )";
-        
+
         db_.execute(query, page.url, page.title, page.content_hash, page.size_bytes);
-        
+
         std::cout << "  ✓ Page stored in database" << std::endl;
     }
-    
-    void queueLinks(const std::vector<std::string>& links, 
+
+    void queueLinks(const std::vector<std::string>& links,
                    const std::string& parent_url,
                    int depth) {
         int added = 0;
-        
+
         for (const auto& link : links) {
             URL url;
             url.url = link;
@@ -1354,25 +1382,25 @@ private:
             url.depth = depth;
             url.parent_url = parent_url;
             url.discovered_at = std::chrono::system_clock::now();
-            
+
             frontier_.addURL(url);
             added++;
         }
-        
+
         std::cout << "  Queued " << added << " new URLs" << std::endl;
     }
-    
+
     int calculatePriority(const std::string& url, int depth) {
         // Homepage = high priority
-        if (url.find("index.html") != std::string::npos || 
+        if (url.find("index.html") != std::string::npos ||
             url.back() == '/') {
             return 10;
         }
-        
+
         // Decrease priority with depth
         return std::max(1, 10 - depth);
     }
-    
+
     std::string extractDomain(const std::string& url) {
         size_t start = url.find("://");
         if (start != std::string::npos) {
@@ -1380,19 +1408,24 @@ private:
         } else {
             start = 0;
         }
-        
+
         size_t end = url.find('/', start);
         if (end == std::string::npos) {
             end = url.length();
         }
-        
+
         return url.substr(start, end - start);
     }
 };
 ```
 
+</details>
+
 
 ### 7.5 Complete Web Crawler System
+
+<details>
+<summary>WebCrawler Class</summary>
 
 ```cpp
 class WebCrawler {
@@ -1400,19 +1433,19 @@ private:
     URLFrontier frontier_;
     RobotsTxtHandler robots_handler_;
     DatabaseConnection db_;
-    
+
     std::vector<std::thread> worker_threads_;
     int num_workers_;
-    
+
 public:
     WebCrawler(int num_workers = 4)
         : db_("postgresql://localhost/crawler"),
           frontier_(1.0),  // 1 second crawl delay
           num_workers_(num_workers) {}
-    
+
     void addSeedURLs(const std::vector<std::string>& seed_urls) {
         std::cout << "=== Adding Seed URLs ===" << std::endl;
-        
+
         for (const auto& url_str : seed_urls) {
             URL url;
             url.url = url_str;
@@ -1420,39 +1453,39 @@ public:
             url.priority = 10;  // Highest priority for seeds
             url.depth = 0;
             url.discovered_at = std::chrono::system_clock::now();
-            
+
             frontier_.addURL(url);
         }
-        
+
         std::cout << "Added " << seed_urls.size() << " seed URLs" << std::endl;
     }
-    
+
     void start() {
         std::cout << "\n=== Starting Web Crawler ===" << std::endl;
         std::cout << "Workers: " << num_workers_ << std::endl;
         std::cout << "Crawl delay: 1 second per domain" << std::endl;
-        
+
         for (int i = 0; i < num_workers_; ++i) {
             worker_threads_.emplace_back([this, i]() {
                 CrawlerWorker worker(frontier_, robots_handler_, db_);
                 worker.crawl();
-                
+
                 std::cout << "\n[Worker " << i << "] Finished" << std::endl;
                 std::cout << "  Pages crawled: " << worker.getPagesCrawled() << std::endl;
                 std::cout << "  Data downloaded: " << (worker.getBytesDownloaded() / 1024 / 1024) << " MB" << std::endl;
             });
         }
-        
+
         // Wait for all workers
         for (auto& thread : worker_threads_) {
             if (thread.joinable()) {
                 thread.join();
             }
         }
-        
+
         std::cout << "\n=== Crawl Complete ===" << std::endl;
     }
-    
+
 private:
     std::string extractDomain(const std::string& url) {
         size_t start = url.find("://");
@@ -1461,34 +1494,36 @@ private:
         } else {
             start = 0;
         }
-        
+
         size_t end = url.find('/', start);
         if (end == std::string::npos) {
             end = url.length();
         }
-        
+
         return url.substr(start, end - start);
     }
 };
 
 int main() {
     WebCrawler crawler(4);  // 4 worker threads
-    
+
     // Add seed URLs
     std::vector<std::string> seeds = {
         "https://example.com",
         "https://example.org",
         "https://example.net"
     };
-    
+
     crawler.addSeedURLs(seeds);
-    
+
     // Start crawling
     crawler.start();
-    
+
     return 0;
 }
 ```
+
+</details>
 
 
 ***
@@ -1501,12 +1536,15 @@ int main() {
 
 **Solution: Aggressive DNS Caching**
 
+<details>
+<summary>DNSCache Class</summary>
+
 ```cpp
 class DNSCache {
 private:
     std::unordered_map<std::string, std::string> cache_;
     std::mutex mtx_;
-    
+
 public:
     std::string resolve(const std::string& domain) {
         // Check cache
@@ -1517,16 +1555,16 @@ public:
                 return it->second;  // <1ms (cached)
             }
         }
-        
+
         // Actual DNS lookup
         std::string ip = performDNSLookup(domain);  // 50ms
-        
+
         // Cache result
         {
             std::lock_guard<std::mutex> lock(mtx_);
             cache_[domain] = ip;
         }
-        
+
         return ip;
     }
 };
@@ -1535,6 +1573,8 @@ public:
 // Average: 0.95 × 1ms + 0.05 × 50ms = 3.45ms (14× faster)
 ```
 
+</details>
+
 
 ### Bottleneck 2: URL Deduplication at Scale
 
@@ -1542,23 +1582,26 @@ public:
 
 **Solution: Bloom Filter**
 
+<details>
+<summary>BloomFilter Class</summary>
+
 ```cpp
 class BloomFilter {
 private:
     std::vector<bool> bits_;
     int num_hash_functions_;
-    
+
 public:
-    BloomFilter(size_t size, int num_hashes) 
+    BloomFilter(size_t size, int num_hashes)
         : bits_(size, false), num_hash_functions_(num_hashes) {}
-    
+
     void add(const std::string& url) {
         for (int i = 0; i < num_hash_functions_; ++i) {
             size_t hash = computeHash(url, i);
             bits_[hash % bits_.size()] = true;
         }
     }
-    
+
     bool mightContain(const std::string& url) {
         for (int i = 0; i < num_hash_functions_; ++i) {
             size_t hash = computeHash(url, i);
@@ -1574,6 +1617,8 @@ public:
 // False positive rate: 1% (acceptable)
 ```
 
+</details>
+
 
 ### Bottleneck 3: Content Deduplication
 
@@ -1581,19 +1626,22 @@ public:
 
 **Solution: Incremental Hashing (Simhash)**
 
+<details>
+<summary>SimHash Class</summary>
+
 ```cpp
 class SimHash {
 public:
     uint64_t compute(const std::string& text) {
         // Extract features (words)
         auto words = tokenize(text);
-        
+
         // Weighted hash
         std::vector<int> v(64, 0);
-        
+
         for (const auto& word : words) {
             uint64_t hash = std::hash<std::string>{}(word);
-            
+
             for (int i = 0; i < 64; ++i) {
                 if (hash & (1ULL << i)) {
                     v[i]++;
@@ -1602,7 +1650,7 @@ public:
                 }
             }
         }
-        
+
         // Combine
         uint64_t simhash = 0;
         for (int i = 0; i < 64; ++i) {
@@ -1610,15 +1658,15 @@ public:
                 simhash |= (1ULL << i);
             }
         }
-        
+
         return simhash;
     }
-    
+
     int hammingDistance(uint64_t h1, uint64_t h2) {
         uint64_t x = h1 ^ h2;
         return __builtin_popcountll(x);
     }
-    
+
     bool areNearDuplicates(uint64_t h1, uint64_t h2, int threshold = 3) {
         return hammingDistance(h1, h2) <= threshold;
     }
@@ -1627,6 +1675,8 @@ public:
 // Detect near-duplicates (90%+ similar content)
 // Much faster than full text comparison
 ```
+
+</details>
 
 
 ***

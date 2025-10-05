@@ -702,6 +702,9 @@ graph TB
 
 **Partition Strategy:**
 
+<details>
+<summary>C++ Code</summary>
+
 ```cpp
 // Producer decides which partition to send message
 int selectPartition(const Message& msg, int num_partitions) {
@@ -720,6 +723,8 @@ int selectPartition(const Message& msg, int num_partitions) {
     return round_robin_counter++ % num_partitions;
 }
 ```
+
+</details>
 
 **Why Partitioning?**
 
@@ -752,6 +757,9 @@ ISR (In-Sync Replicas): [1, 2, 3]
 ```
 
 **Replication Protocol:**
+
+<details>
+<summary>PartitionLeader Class</summary>
 
 ```cpp
 class PartitionLeader {
@@ -821,6 +829,8 @@ public:
 };
 ```
 
+</details>
+
 **High Water Mark (HWM):**
 
 ```
@@ -839,6 +849,9 @@ Consumers can only read up to HWM (offset 3, since offset 4 not committed)
 ```
 
 **Leader Election:**
+
+<details>
+<summary>Controller Class</summary>
 
 ```cpp
 class Controller {
@@ -879,6 +892,8 @@ public:
 };
 ```
 
+</details>
+
 
 ***
 
@@ -911,6 +926,9 @@ C4: [P5, P2]
 ```
 
 **Rebalancing Protocol:**
+
+<details>
+<summary>GroupCoordinator Class</summary>
 
 ```cpp
 class GroupCoordinator {
@@ -1079,6 +1097,8 @@ public:
 };
 ```
 
+</details>
+
 **Rebalancing Flow:**
 
 ```
@@ -1129,6 +1149,9 @@ Producer retries → M1 written twice
 
 **Solution: Idempotent Producer**
 
+<details>
+<summary>IdempotentProducer Class</summary>
+
 ```cpp
 class IdempotentProducer {
 private:
@@ -1174,7 +1197,12 @@ public:
 };
 ```
 
+</details>
+
 **Transactional Messaging (Full EOS):**
+
+<details>
+<summary>TransactionalProducer Class</summary>
 
 ```cpp
 class TransactionalProducer {
@@ -1272,6 +1300,8 @@ public:
 };
 ```
 
+</details>
+
 
 ***
 
@@ -1290,6 +1320,9 @@ Total: 4 context switches, 2 CPU copies
 ```
 
 **Solution: sendfile() System Call**
+
+<details>
+<summary>KafkaFetchHandler Class</summary>
 
 ```cpp
 class KafkaFetchHandler {
@@ -1317,6 +1350,8 @@ public:
     }
 };
 ```
+
+</details>
 
 **Zero-copy flow:**
 
@@ -1348,6 +1383,9 @@ Latest value for each key is retained
 
 **Implementation:**
 
+<details>
+<summary>LogCompactor Class</summary>
+
 ```cpp
 class LogCompactor {
 public:
@@ -1377,6 +1415,8 @@ public:
     }
 };
 ```
+
+</details>
 
 **Use Cases:**
 

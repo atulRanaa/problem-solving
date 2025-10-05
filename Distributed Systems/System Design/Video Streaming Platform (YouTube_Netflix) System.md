@@ -1018,6 +1018,9 @@ graph TB
 
 ### 7.1 Video Upload Handler
 
+<details>
+<summary>VideoUploadSession Struct</summary>
+
 ```cpp
 #include <string>
 #include <vector>
@@ -1238,8 +1241,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 7.2 Video Transcoding Worker
+
+<details>
+<summary>TranscodingJob Struct</summary>
 
 ```cpp
 #include <thread>
@@ -1399,8 +1407,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 7.3 Thumbnail Generator
+
+<details>
+<summary>ThumbnailGenerator Class</summary>
 
 ```cpp
 class ThumbnailGenerator {
@@ -1490,8 +1503,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 7.4 Complete Video Processing Pipeline
+
+<details>
+<summary>VideoProcessingPipeline Class</summary>
 
 ```cpp
 class VideoProcessingPipeline {
@@ -1666,12 +1684,17 @@ int main() {
 }
 ```
 
+</details>
+
 
 ***
 
 ## Step 8: Advanced Features (Continued in next part due to length...)
 
 ### 8.1 Adaptive Bitrate Player
+
+<details>
+<summary>AdaptiveBitratePlayer Class</summary>
 
 ```cpp
 class AdaptiveBitratePlayer {
@@ -1782,6 +1805,8 @@ private:
 };
 ```
 
+</details>
+
 
 ***
 
@@ -1792,6 +1817,9 @@ private:
 **Problem:** Transcoding 1.1M videos/day is CPU-intensive
 
 **Solution: GPU Acceleration + Smart Transcoding**
+
+<details>
+<summary>OptimizedTranscoder Class</summary>
 
 ```cpp
 class OptimizedTranscoder {
@@ -1826,6 +1854,8 @@ public:
 
 // Result: 50% cost reduction by avoiding unnecessary transcoding
 ```
+
+</details>
 
 
 ### Bottleneck 2: Storage Costs
@@ -1863,6 +1893,9 @@ YouTube's actual approach:
 
 **Solution: P2P + Smart Caching**
 
+<details>
+<summary>P2PVideoDelivery Class</summary>
+
 ```cpp
 // P2P delivery (like BitTorrent)
 class P2PVideoDelivery {
@@ -1884,6 +1917,8 @@ public:
 
 // Result: 40% CDN cost reduction for popular videos
 ```
+
+</details>
 
 
 ***

@@ -453,6 +453,9 @@ graph TB
 
 ### 6.1 Change Event Structure
 
+<details>
+<summary>class Enum</summary>
+
 ```cpp
 #include <string>
 #include <unordered_map>
@@ -585,8 +588,13 @@ public:
 };
 ```
 
+</details>
+
 
 ### 6.2 Binlog Position Tracking
+
+<details>
+<summary>BinlogPosition Struct</summary>
 
 ```cpp
 struct BinlogPosition {
@@ -683,8 +691,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 6.3 MySQL Binlog Reader
+
+<details>
+<summary>MySQLBinlogReader Class</summary>
 
 ```cpp
 #include <mysql/mysql.h>
@@ -836,8 +849,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 6.4 PostgreSQL WAL Reader
+
+<details>
+<summary>PostgreSQLWALReader Class</summary>
 
 ```cpp
 #include <libpq-fe.h>
@@ -985,8 +1003,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 6.5 CDC Connector
+
+<details>
+<summary>CDCConnector Class</summary>
 
 ```cpp
 #include <thread>
@@ -1141,8 +1164,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 6.6 Complete CDC System
+
+<details>
+<summary>C++ Code</summary>
 
 ```cpp
 int main() {
@@ -1193,12 +1221,17 @@ int main() {
 }
 ```
 
+</details>
+
 
 ***
 
 ## Step 7: Advanced Features
 
 ### 7.1 Initial Snapshot
+
+<details>
+<summary>SnapshotManager Class</summary>
 
 ```cpp
 class SnapshotManager {
@@ -1234,8 +1267,13 @@ public:
 };
 ```
 
+</details>
+
 
 ### 7.2 Schema Evolution
+
+<details>
+<summary>SchemaRegistry Class</summary>
 
 ```cpp
 class SchemaRegistry {
@@ -1287,8 +1325,13 @@ public:
 };
 ```
 
+</details>
+
 
 ### 7.3 Filtering \& Transformation
+
+<details>
+<summary>EventFilter Class</summary>
 
 ```cpp
 class EventFilter {
@@ -1338,6 +1381,8 @@ public:
 };
 ```
 
+</details>
+
 
 ***
 
@@ -1348,6 +1393,9 @@ public:
 **Problem:** Parsing 100K events/sec is CPU-intensive
 
 **Solution: Batch Processing**
+
+<details>
+<summary>BatchedBinlogReader Class</summary>
 
 ```cpp
 class BatchedBinlogReader {
@@ -1373,10 +1421,15 @@ public:
 // Result: 10x throughput improvement (100K → 1M events/sec)
 ```
 
+</details>
+
 
 ### Bottleneck 2: Network Latency to Kafka
 
 **Solution: Async Publishing with Batching**
+
+<details>
+<summary>BatchedKafkaProducer Class</summary>
 
 ```cpp
 class BatchedKafkaProducer {
@@ -1407,12 +1460,17 @@ public:
 // Latency: Single event: 50ms, Batched: 5ms per event
 ```
 
+</details>
+
 
 ### Bottleneck 3: High Cardinality Keys
 
 **Problem:** 10K tables → 30K Kafka partitions → High overhead
 
 **Solution: Dynamic Partition Assignment**
+
+<details>
+<summary>C++ Code</summary>
 
 ```cpp
 std::string getKafkaTopic(const ChangeEvent& event) {
@@ -1429,10 +1487,15 @@ std::string getKafkaTopic(const ChangeEvent& event) {
 // Result: 30K partitions → 100 partitions (300x reduction)
 ```
 
+</details>
+
 
 ***
 
 ## Step 9: Monitoring \& Metrics
+
+<details>
+<summary>CDCMetrics Class</summary>
 
 ```cpp
 class CDCMetrics {
@@ -1469,6 +1532,8 @@ public:
     }
 };
 ```
+
+</details>
 
 
 ***

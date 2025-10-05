@@ -785,6 +785,9 @@ graph TB
 
 ### 7.1 Operational Transformation Engine
 
+<details>
+<summary>class Enum</summary>
+
 ```cpp
 #include <string>
 #include <vector>
@@ -955,8 +958,13 @@ public:
 };
 ```
 
+</details>
+
 
 ### 7.2 Document Manager
+
+<details>
+<summary>DocumentState Struct</summary>
 
 ```cpp
 #include <unordered_map>
@@ -1141,8 +1149,13 @@ public:
 };
 ```
 
+</details>
+
 
 ### 7.3 WebSocket Server
+
+<details>
+<summary>ClientSession Struct</summary>
 
 ```cpp
 #include <websocketpp/config/asio_no_tls.hpp>
@@ -1421,8 +1434,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 7.4 Complete System
+
+<details>
+<summary>CollaborativeEditingSystem Class</summary>
 
 ```cpp
 class CollaborativeEditingSystem {
@@ -1495,6 +1513,8 @@ int main() {
 }
 ```
 
+</details>
+
 
 ***
 
@@ -1505,6 +1525,9 @@ int main() {
 **Problem:** Broadcasting to 100 users = 100 individual sends
 
 **Solution: Redis Pub/Sub**
+
+<details>
+<summary>OptimizedBroadcast Class</summary>
 
 ```cpp
 class OptimizedBroadcast {
@@ -1529,12 +1552,17 @@ public:
 // Latency: <50ms (vs 200ms for individual sends)
 ```
 
+</details>
+
 
 ### Bottleneck 2: OT Transformation CPU Cost
 
 **Problem:** 150M operations/sec = expensive transformations
 
 **Solution: Batch Transformations**
+
+<details>
+<summary>BatchOTEngine Class</summary>
 
 ```cpp
 class BatchOTEngine {
@@ -1557,6 +1585,8 @@ public:
     // 10× faster than individual transformations
 };
 ```
+
+</details>
 
 
 ### Bottleneck 3: Cursor Update Storm

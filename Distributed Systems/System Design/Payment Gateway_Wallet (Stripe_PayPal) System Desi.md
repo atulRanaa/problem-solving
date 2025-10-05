@@ -1074,6 +1074,9 @@ graph TB
 
 ### 7.1 Double-Entry Ledger Service
 
+<details>
+<summary>LedgerEntry Struct</summary>
+
 ```cpp
 #include <string>
 #include <vector>
@@ -1416,8 +1419,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 7.2 Payment Processing Service
+
+<details>
+<summary>class Enum</summary>
 
 ```cpp
 enum class PaymentStatus {
@@ -1705,8 +1713,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 7.3 Idempotency Handler
+
+<details>
+<summary>IdempotencyService Class</summary>
 
 ```cpp
 class IdempotencyService {
@@ -1788,8 +1801,13 @@ public:
 };
 ```
 
+</details>
+
 
 ### 7.4 Fraud Detection Service
+
+<details>
+<summary>FraudDetectionService Class</summary>
 
 ```cpp
 class FraudDetectionService {
@@ -1890,8 +1908,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 7.5 Complete Payment Gateway System
+
+<details>
+<summary>PaymentGateway Class</summary>
 
 ```cpp
 class PaymentGateway {
@@ -2107,6 +2130,8 @@ int main() {
 }
 ```
 
+</details>
+
 
 ***
 
@@ -2117,6 +2142,9 @@ int main() {
 **Problem:** 2,314 ledger writes/sec (2 entries per transaction)
 
 **Solution: Write Batching**
+
+<details>
+<summary>BatchedLedgerService Class</summary>
 
 ```cpp
 class BatchedLedgerService {
@@ -2160,12 +2188,17 @@ private:
 // Result: 2,314 individual writes → 3 batch writes (99.87% reduction!)
 ```
 
+</details>
+
 
 ### Bottleneck 2: Balance Lookups
 
 **Problem:** Every payment requires balance check = 1,157 reads/sec
 
 **Solution: Redis Cache with Write-Through**
+
+<details>
+<summary>C++ Code</summary>
 
 ```cpp
 Money getBalanceCached(const std::string& account_id) {
@@ -2188,12 +2221,17 @@ Money getBalanceCached(const std::string& account_id) {
 // Average latency: 0.95 × 1ms + 0.05 × 10ms = 1.45ms
 ```
 
+</details>
+
 
 ### Bottleneck 3: Fraud Detection Latency
 
 **Problem:** ML model inference adds 50ms to every payment
 
 **Solution: Async Fraud Scoring**
+
+<details>
+<summary>AsyncFraudDetection Class</summary>
 
 ```cpp
 class AsyncFraudDetection {
@@ -2228,6 +2266,8 @@ public:
 // Result: Payment latency 400ms → 350ms (50ms saved)
 // Accept small fraud risk (refund later) for better UX
 ```
+
+</details>
 
 
 ***

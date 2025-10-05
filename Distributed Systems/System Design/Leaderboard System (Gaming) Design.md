@@ -594,6 +594,9 @@ graph TB
 
 ### 7.1 Redis-Based Leaderboard
 
+<details>
+<summary>Player Struct</summary>
+
 ```cpp
 #include <string>
 #include <vector>
@@ -788,8 +791,13 @@ public:
 };
 ```
 
+</details>
+
 
 ### 7.2 Multi-Leaderboard Manager
+
+<details>
+<summary>class Enum</summary>
 
 ```cpp
 enum class LeaderboardType {
@@ -945,8 +953,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 7.3 Rank Change Notifier
+
+<details>
+<summary>RankChangeNotifier Class</summary>
 
 ```cpp
 class RankChangeNotifier {
@@ -1036,8 +1049,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 7.4 Complete Leaderboard System
+
+<details>
+<summary>LeaderboardSystem Class</summary>
 
 ```cpp
 class LeaderboardSystem {
@@ -1133,6 +1151,8 @@ int main() {
 }
 ```
 
+</details>
+
 
 ***
 
@@ -1167,6 +1187,9 @@ Result: Distribute load across multiple Redis instances
 
 **Solution: Aggressive Caching**
 
+<details>
+<summary>CachedLeaderboard Class</summary>
+
 ```cpp
 class CachedLeaderboard {
 private:
@@ -1195,6 +1218,8 @@ public:
 
 // Result: 347 QPS → 0.1 QPS to Redis (3,470× reduction)
 ```
+
+</details>
 
 
 ### Bottleneck 3: Global Rank Query Latency

@@ -382,6 +382,9 @@ Response: 202 Accepted
 
 **Hash Table Structure:**
 
+<details>
+<summary>Entry Struct</summary>
+
 ```cpp
 struct Entry {
     string key;
@@ -415,6 +418,8 @@ public:
     void cleanup_expired();
 };
 ```
+
+</details>
 
 
 ### Persistent Storage (Disk)
@@ -480,6 +485,9 @@ Used by: BerkeleyDB, LMDB
 
 **RocksDB Configuration:**
 
+<details>
+<summary>C++ Code</summary>
+
 ```cpp
 rocksdb::Options options;
 options.create_if_missing = true;
@@ -495,6 +503,8 @@ BlockBasedTableOptions table_options;
 table_options.filter_policy.reset(NewBloomFilterPolicy(10, false));
 options.table_factory.reset(NewBlockBasedTableFactory(table_options));
 ```
+
+</details>
 
 
 ### Replication Log
@@ -664,6 +674,9 @@ Consistent hashing: Hash keys AND nodes onto same ring
 
 **Implementation:**
 
+<details>
+<summary>ConsistentHashRing Class</summary>
+
 ```cpp
 class ConsistentHashRing {
 private:
@@ -781,6 +794,8 @@ string coordinator = ring.getCoordinator(key);  // "node_2"
 vector<string> replicas = ring.getReplicas(key, 3);  // ["node_2", "node_3", "node_1"]
 ```
 
+</details>
+
 **Virtual Nodes Benefits:**
 
 ```
@@ -803,6 +818,9 @@ Node 3: 33.3% of data
 ### 6.2 Replication Strategies
 
 **Single-Leader Replication (Master-Slave):**
+
+<details>
+<summary>SingleLeaderReplication Class</summary>
 
 ```cpp
 class SingleLeaderReplication {
@@ -837,7 +855,12 @@ public:
 // Cons: Leader is bottleneck, single point of failure
 ```
 
+</details>
+
 **Multi-Leader Replication (Multi-Master):**
+
+<details>
+<summary>MultiLeaderReplication Class</summary>
 
 ```cpp
 class MultiLeaderReplication {
@@ -871,7 +894,12 @@ public:
 // Cons: Conflict resolution complexity
 ```
 
+</details>
+
 **Leaderless Replication (Dynamo-style):**
+
+<details>
+<summary>LeaderlessReplication Class</summary>
 
 ```cpp
 class LeaderlessReplication {
@@ -959,6 +987,8 @@ public:
 // W=3, R=1, N=3: Durability, slower writes
 ```
 
+</details>
+
 
 ***
 
@@ -975,6 +1005,9 @@ Which version is correct?
 ```
 
 **Solution: Vector Clocks**
+
+<details>
+<summary>VectorClock Class</summary>
 
 ```cpp
 class VectorClock {
@@ -1088,6 +1121,8 @@ v3.increment("node_3");  // {node_1: 1, node_3: 1}
 v2.compare(v3);  // CONCURRENT (both derived from v1)
 ```
 
+</details>
+
 
 ***
 
@@ -1096,6 +1131,9 @@ v2.compare(v3);  // CONCURRENT (both derived from v1)
 **Purpose:** Detect node failures without centralized coordinator.
 
 **Implementation:**
+
+<details>
+<summary>GossipProtocol Class</summary>
 
 ```cpp
 class GossipProtocol {
@@ -1197,6 +1235,8 @@ public:
 };
 ```
 
+</details>
+
 **Gossip Convergence:**
 
 ```
@@ -1219,6 +1259,9 @@ Total messages: N × fanout = 100 × 3 = 300 messages
 **Problem:** Replica node is down, cannot acknowledge write.
 
 **Solution:** Write to "hint" node temporarily.
+
+<details>
+<summary>HintedHandoff Class</summary>
 
 ```cpp
 class HintedHandoff {
@@ -1266,6 +1309,8 @@ public:
 };
 ```
 
+</details>
+
 
 ***
 
@@ -1274,6 +1319,9 @@ public:
 **Problem:** Replica has stale data (missed writes due to downtime).
 
 **Solution:** Detect and fix during reads.
+
+<details>
+<summary>C++ Code</summary>
 
 ```cpp
 ReadResult read(const string& key) {
@@ -1306,6 +1354,8 @@ ReadResult read(const string& key) {
 }
 ```
 
+</details>
+
 
 ***
 
@@ -1316,6 +1366,9 @@ ReadResult read(const string& key) {
 **Problem:** Popular keys (e.g., celebrity data) cause hotspots on a single node.
 
 **Solution 1: Read Replicas**
+
+<details>
+<summary>C++ Code</summary>
 
 ```cpp
 // Redirect reads for hot keys to random replica
@@ -1332,7 +1385,12 @@ ReadResult readHotKey(const string& key) {
 }
 ```
 
+</details>
+
 **Solution 2: Client-Side Caching**
+
+<details>
+<summary>ClientCache Class</summary>
 
 ```cpp
 // Cache hot keys on client
@@ -1351,6 +1409,8 @@ class ClientCache {
 };
 ```
 
+</details>
+
 **Trade-off:** Consistency vs performance
 
 ***
@@ -1360,6 +1420,9 @@ class ClientCache {
 **Problem:** Synchronous replication slows writes
 
 **Solution: Async Replication with Batching**
+
+<details>
+<summary>BatchedReplication Class</summary>
 
 ```cpp
 class BatchedReplication {
@@ -1383,6 +1446,8 @@ class BatchedReplication {
 
 // Result: 10x throughput (100 RPCs → 1 RPC)
 ```
+
+</details>
 
 **Trade-off:** Latency vs throughput
 
@@ -1420,6 +1485,9 @@ Recommendation: W + R > N (always)
 
 **Solution: Value Compression**
 
+<details>
+<summary>C++ Code</summary>
+
 ```cpp
 Entry put(const string& key, const string& value) {
     string compressed = compress(value, SNAPPY);
@@ -1436,6 +1504,8 @@ Entry put(const string& key, const string& value) {
 // 10 MB → 2-3 MB (network savings)
 ```
 
+</details>
+
 **Trade-off:** CPU vs network
 
 ***
@@ -1445,6 +1515,9 @@ Entry put(const string& key, const string& value) {
 **Problem:** Checking if key exists requires disk read.
 
 **Solution: In-Memory Bloom Filter**
+
+<details>
+<summary>OptimizedStorage Class</summary>
 
 ```cpp
 class OptimizedStorage {
@@ -1470,6 +1543,8 @@ class OptimizedStorage {
 // Saves 99% of disk lookups for absent keys
 ```
 
+</details>
+
 
 ***
 
@@ -1478,6 +1553,9 @@ class OptimizedStorage {
 **Problem:** LSM tree accumulates many SSTables (slow reads).
 
 **Solution: Background Compaction**
+
+<details>
+<summary>LSMCompaction Class</summary>
 
 ```cpp
 class LSMCompaction {
@@ -1503,6 +1581,8 @@ class LSMCompaction {
 // After: 1 SSTable → 1 disk seek (10x faster)
 ```
 
+</details>
+
 
 ***
 
@@ -1511,6 +1591,9 @@ class LSMCompaction {
 **Problem:** Single 10 MB value doesn't fit in memory.
 
 **Solution: Chunking**
+
+<details>
+<summary>C++ Code</summary>
 
 ```cpp
 void putLargeValue(const string& key, const string& value) {
@@ -1540,6 +1623,8 @@ string getLargeValue(const string& key) {
     return result;
 }
 ```
+
+</details>
 
 
 ***

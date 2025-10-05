@@ -661,6 +661,9 @@ graph TB
 
 ### 6.1 Rate Limiter (Token Bucket)
 
+<details>
+<summary>TokenBucketRateLimiter Class</summary>
+
 ```cpp
 #include <chrono>
 #include <mutex>
@@ -765,8 +768,13 @@ public:
 };
 ```
 
+</details>
+
 
 ### 6.2 Circuit Breaker
+
+<details>
+<summary>class Enum</summary>
 
 ```cpp
 enum class CircuitState {
@@ -862,8 +870,13 @@ public:
 };
 ```
 
+</details>
+
 
 ### 6.3 Request Router
+
+<details>
+<summary>Route Struct</summary>
 
 ```cpp
 struct Route {
@@ -933,8 +946,13 @@ public:
 };
 ```
 
+</details>
+
 
 ### 6.4 Complete API Gateway
+
+<details>
+<summary>Request Struct</summary>
 
 ```cpp
 #include <httplib.h>  // cpp-httplib for HTTP server
@@ -1181,6 +1199,8 @@ int main() {
     return 0;
 }
 ```
+
+</details>
 
 
 ***

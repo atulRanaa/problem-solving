@@ -725,6 +725,9 @@ graph TB
 
 ### 7.1 Expense Management
 
+<details>
+<summary>class Enum</summary>
+
 ```cpp
 #include <iostream>
 #include <vector>
@@ -885,8 +888,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 7.2 Balance Calculation
+
+<details>
+<summary>BalanceManager Class</summary>
 
 ```cpp
 class BalanceManager {
@@ -1020,8 +1028,13 @@ public:
 };
 ```
 
+</details>
+
 
 ### 7.3 Debt Simplification Algorithm
+
+<details>
+<summary>SettlementOptimizer Class</summary>
 
 ```cpp
 class SettlementOptimizer {
@@ -1110,8 +1123,13 @@ public:
 };
 ```
 
+</details>
+
 
 ### 7.4 Complete Splitwise System
+
+<details>
+<summary>SplitwiseSystem Class</summary>
 
 ```cpp
 class SplitwiseSystem {
@@ -1274,12 +1292,17 @@ int main() {
 }
 ```
 
+</details>
+
 
 ***
 
 ## Step 8: Advanced Features
 
 ### 8.1 Multiple Currencies
+
+<details>
+<summary>CurrencyConverter Class</summary>
 
 ```cpp
 class CurrencyConverter {
@@ -1308,8 +1331,13 @@ public:
 };
 ```
 
+</details>
+
 
 ### 8.2 Percentage-Based Split
+
+<details>
+<summary>C++ Code</summary>
 
 ```cpp
 ExpenseId addPercentageSplit(GroupId group_id,
@@ -1350,6 +1378,8 @@ ExpenseId addPercentageSplit(GroupId group_id,
 }
 ```
 
+</details>
+
 
 ***
 
@@ -1382,6 +1412,9 @@ REFRESH MATERIALIZED VIEW user_balances;
 
 **Optimization: Cache Net Balances**
 
+<details>
+<summary>CachedSettlementOptimizer Class</summary>
+
 ```cpp
 class CachedSettlementOptimizer {
 private:
@@ -1404,6 +1437,8 @@ public:
 };
 ```
 
+</details>
+
 
 ### Bottleneck 3: Large Groups
 
@@ -1411,16 +1446,24 @@ public:
 
 **Solution: Hierarchical Groups**
 
+<details>
+<summary>C++ Code</summary>
+
 ```cpp
 // Instead of tracking all pairs, track:
 // - Individual → Group balance
 // - Settle within subgroups first
 ```
 
+</details>
+
 
 ***
 
 ## Step 10: Testing Edge Cases
+
+<details>
+<summary>C++ Code</summary>
 
 ```cpp
 void testEdgeCases() {
@@ -1447,6 +1490,8 @@ void testEdgeCases() {
     assert(sum == 0);  // Must balance!
 }
 ```
+
+</details>
 
 
 ***

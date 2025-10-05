@@ -397,6 +397,9 @@ RETURN follower
 
 **1. Pull Model (Fan-out-on-Read)**
 
+<details>
+<summary>C++ Code</summary>
+
 ```cpp
 // User requests feed - generate on-demand
 vector<Post> generateFeed(int64_t user_id) {
@@ -426,6 +429,8 @@ vector<Post> generateFeed(int64_t user_id) {
 }
 ```
 
+</details>
+
 **Pros:**
 
 - Low write latency (simple post creation)
@@ -439,6 +444,9 @@ vector<Post> generateFeed(int64_t user_id) {
 - Database load spikes on feed requests
 
 **2. Push Model (Fan-out-on-Write)**[^4][^5]
+
+<details>
+<summary>C++ Code</summary>
 
 ```cpp
 // When user creates post - push to all followers
@@ -482,6 +490,8 @@ vector<Post> generateFeed(int64_t user_id) {
 }
 ```
 
+</details>
+
 **Pros:**
 
 - Very fast feed reads (O(1) cache lookup)
@@ -495,6 +505,9 @@ vector<Post> generateFeed(int64_t user_id) {
 - Write amplification (1 post → millions of writes)
 
 **3. Hybrid Model (Recommended)**[^3][^4]
+
+<details>
+<summary>HybridFeedGenerator Class</summary>
 
 ```cpp
 class HybridFeedGenerator {
@@ -597,10 +610,15 @@ public:
 };
 ```
 
+</details>
+
 
 ### Feed Ranking Algorithm[^6][^7][^8]
 
 **EdgeRank-inspired Scoring (Simplified):**
+
+<details>
+<summary>FeedRanker Class</summary>
 
 ```cpp
 class FeedRanker {
@@ -710,6 +728,8 @@ public:
 };
 ```
 
+</details>
+
 
 ## Step 7: Bottlenecks \& Optimizations
 
@@ -782,6 +802,9 @@ Thundering herd:
 
 **5. Real-time Updates:**
 
+<details>
+<summary>FeedUpdateNotifier Class</summary>
+
 ```cpp
 // WebSocket for live feed updates
 class FeedUpdateNotifier {
@@ -802,6 +825,8 @@ public:
     }
 };
 ```
+
+</details>
 
 
 ### Trade-offs

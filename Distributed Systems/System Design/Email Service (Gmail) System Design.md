@@ -989,6 +989,9 @@ graph TB
 
 ### 7.1 Email Parser (MIME)
 
+<details>
+<summary>EmailAddress Struct</summary>
+
 ```cpp
 #include <string>
 #include <vector>
@@ -1266,8 +1269,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 7.2 Spam Detection Service
+
+<details>
+<summary>SpamDetector Class</summary>
 
 ```cpp
 class SpamDetector {
@@ -1459,8 +1467,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 7.3 Email Send Service with Queue
+
+<details>
+<summary>OutgoingEmail Struct</summary>
 
 ```cpp
 #include <queue>
@@ -1618,8 +1631,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 7.4 Complete Email System
+
+<details>
+<summary>GmailSystem Class</summary>
 
 ```cpp
 class GmailSystem {
@@ -1750,6 +1768,8 @@ int main() {
 }
 ```
 
+</details>
+
 
 ***
 
@@ -1816,6 +1836,9 @@ Result:
 
 **Solution: Tiered Detection**
 
+<details>
+<summary>TieredSpamDetection Class</summary>
+
 ```cpp
 class TieredSpamDetection {
 public:
@@ -1846,6 +1869,8 @@ public:
 // 5% emails: Tier 3 (100ms)
 // Average: 0.7 × 5 + 0.25 × 20 + 0.05 × 100 = 13.5ms
 ```
+
+</details>
 
 
 ***

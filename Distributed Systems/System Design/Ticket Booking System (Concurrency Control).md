@@ -403,6 +403,9 @@ Result: DOUBLE BOOKING! Both users see seat as available.
 
 **Without proper locking, this happens:**
 
+<details>
+<summary>C++ Code</summary>
+
 ```cpp
 // WRONG CODE - Race condition
 bool bookSeat(int seat_id, int user_id) {
@@ -426,6 +429,8 @@ bool bookSeat(int seat_id, int user_id) {
 // Result: Race condition - double booking possible!
 ```
 
+</details>
+
 
 ***
 
@@ -438,6 +443,9 @@ bool bookSeat(int seat_id, int user_id) {
 - Guarantees no concurrent modification
 
 **Implementation:**
+
+<details>
+<summary>PessimisticBookingService Class</summary>
 
 ```cpp
 #include <pqxx/pqxx>
@@ -559,6 +567,8 @@ private:
 // Result: No double booking! User B waits for User A.
 ```
 
+</details>
+
 **Pros:**
 
 - ✅ Prevents race conditions completely
@@ -582,6 +592,9 @@ private:
 - Retry if version changed (someone else modified)
 
 **Implementation:**
+
+<details>
+<summary>OptimisticBookingService Class</summary>
 
 ```cpp
 class OptimisticBookingService {
@@ -707,6 +720,8 @@ private:
 // Result: No double booking! User B detects conflict and retries.
 ```
 
+</details>
+
 **Pros:**
 
 - ✅ Better throughput (no lock waiting)
@@ -730,6 +745,9 @@ private:
 - Combine with database transaction
 
 **Implementation:**
+
+<details>
+<summary>RedisDistributedLock Class</summary>
 
 ```cpp
 #include <hiredis/hiredis.h>
@@ -918,6 +936,8 @@ public:
 // → No deadlock! B waits for A to finish.
 ```
 
+</details>
+
 **Pros:**
 
 - ✅ Works across multiple servers
@@ -942,6 +962,9 @@ public:
 - **Durability**: Committed data persists
 
 **Isolation Levels (PostgreSQL):**
+
+<details>
+<summary>C++ Code</summary>
 
 ```cpp
 // READ UNCOMMITTED (PostgreSQL doesn't support - defaults to READ COMMITTED)
@@ -971,7 +994,12 @@ BEGIN TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 // - May abort with serialization failure (retry needed)
 ```
 
+</details>
+
 **Choosing Isolation Level:**
+
+<details>
+<summary>BookingServiceWithIsolation Class</summary>
 
 ```cpp
 class BookingServiceWithIsolation {
@@ -1002,6 +1030,8 @@ public:
 // Good balance of performance and correctness
 ```
 
+</details>
+
 
 ***
 
@@ -1021,6 +1051,9 @@ SELECT ... seat_2 FOR UPDATE;   (WAITS for A)
 ```
 
 **Solution: Lock Ordering**
+
+<details>
+<summary>DeadlockFreeBookingService Class</summary>
 
 ```cpp
 class DeadlockFreeBookingService {
@@ -1055,7 +1088,12 @@ public:
 // No circular dependency → No deadlock!
 ```
 
+</details>
+
 **Deadlock Detection \& Retry:**
+
+<details>
+<summary>DeadlockRetryWrapper Class</summary>
 
 ```cpp
 class DeadlockRetryWrapper {
@@ -1091,6 +1129,8 @@ auto booking_id = retry.retryOnDeadlock([&]() {
 });
 ```
 
+</details>
+
 
 ***
 
@@ -1099,6 +1139,9 @@ auto booking_id = retry.retryOnDeadlock([&]() {
 **Problem:** User reserves seat but doesn't complete payment
 
 **Solution: Background Cleanup Job**
+
+<details>
+<summary>ReservationExpiryService Class</summary>
 
 ```cpp
 class ReservationExpiryService {
@@ -1193,12 +1236,17 @@ private:
 };
 ```
 
+</details>
+
 
 ***
 
 ### 6.8 Idempotency (Prevent Duplicate Bookings)
 
 **Problem:** User clicks "Book" button twice
+
+<details>
+<summary>IdempotentBookingService Class</summary>
 
 ```cpp
 class IdempotentBookingService {
@@ -1248,12 +1296,17 @@ public:
 // idempotency_key = hash(user_id + event_id + seat_ids + timestamp)
 ```
 
+</details>
+
 
 ***
 
 ## Step 7: Complete C++ Implementation
 
 ### Main Booking Service
+
+<details>
+<summary>TicketBookingSystem Class</summary>
 
 ```cpp
 #include <iostream>
@@ -1468,6 +1521,8 @@ int main() {
 }
 ```
 
+</details>
+
 
 ***
 
@@ -1483,6 +1538,9 @@ int main() {
 | **SERIALIZABLE Isolation** | Very Low | Very High | 100% | Low | Financial transactions |
 
 ### Performance Benchmarks
+
+<details>
+<summary>C++ Code</summary>
 
 ```cpp
 // Benchmark Results (1000 concurrent booking attempts for same event):
@@ -1509,6 +1567,8 @@ int main() {
 // Use pessimistic only for extremely high-value transactions
 ```
 
+</details>
+
 
 ***
 
@@ -1516,12 +1576,17 @@ int main() {
 
 ### 1. **Race Condition Fundamentals**
 
+<details>
+<summary>C++ Code</summary>
+
 ```cpp
 // Two users reading same data simultaneously
 // Both see "available"
 // Both try to book
 // Result: Double booking (without proper locking)
 ```
+
+</details>
 
 
 ### 2. **Locking Strategies**

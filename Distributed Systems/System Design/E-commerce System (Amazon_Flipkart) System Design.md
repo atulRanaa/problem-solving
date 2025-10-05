@@ -1272,6 +1272,9 @@ Due to length constraints, I'll continue with the C++ implementation in the next
 
 ### 7.1 Inventory Management Service
 
+<details>
+<summary>InventoryItem Struct</summary>
+
 ```cpp
 #include <string>
 #include <mutex>
@@ -1585,8 +1588,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 7.2 Shopping Cart Service
+
+<details>
+<summary>CartItem Struct</summary>
 
 ```cpp
 #include <vector>
@@ -1795,8 +1803,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 7.3 Order Processing Service
+
+<details>
+<summary>OrderRequest Struct</summary>
 
 ```cpp
 struct OrderRequest {
@@ -2094,8 +2107,13 @@ private:
 };
 ```
 
+</details>
+
 
 ### 7.4 Flash Sale Manager
+
+<details>
+<summary>FlashSaleManager Class</summary>
 
 ```cpp
 class FlashSaleManager {
@@ -2216,8 +2234,13 @@ public:
 };
 ```
 
+</details>
+
 
 ### 7.5 Complete E-commerce System
+
+<details>
+<summary>EcommerceSystem Class</summary>
 
 ```cpp
 class EcommerceSystem {
@@ -2370,12 +2393,17 @@ int main() {
 }
 ```
 
+</details>
+
 
 ***
 
 ## Step 8: Advanced Features
 
 ### 8.1 Product Recommendation Engine
+
+<details>
+<summary>RecommendationEngine Class</summary>
 
 ```cpp
 class RecommendationEngine {
@@ -2483,6 +2511,8 @@ private:
 };
 ```
 
+</details>
+
 
 ***
 
@@ -2493,6 +2523,9 @@ private:
 **Problem:** 1000s of users viewing same product = 1000s of DB queries
 
 **Solution: Multi-Layer Caching**
+
+<details>
+<summary>CachedProductService Class</summary>
 
 ```cpp
 class CachedProductService {
@@ -2538,6 +2571,8 @@ public:
 // Hit rate: 95% memory + 4% Redis + 1% DB
 ```
 
+</details>
+
 
 ### Bottleneck 2: Search Performance
 
@@ -2573,6 +2608,9 @@ Result:
 **Problem:** Payment gateway timeout = lost order
 
 **Solution: Asynchronous Payment Processing**
+
+<details>
+<summary>AsyncPaymentProcessor Class</summary>
 
 ```cpp
 class AsyncPaymentProcessor {
@@ -2612,6 +2650,8 @@ public:
 
 // Result: Checkout completes in <2 seconds (user doesn't wait for payment)
 ```
+
+</details>
 
 
 ***
