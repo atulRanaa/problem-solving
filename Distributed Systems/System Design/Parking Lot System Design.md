@@ -883,7 +883,7 @@ graph TB
     PAYMENT_SVC --> SMS
     PAYMENT_SVC --> EMAIL
     
-    style SPOT_SVC fill:#90EE90
+    style SPOT_SVC fill:#336791
     style REDIS fill:#dc382d
     style LPR_SVC fill:#ffa500
     style SENSORS fill:#87CEEB

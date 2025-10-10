@@ -583,7 +583,7 @@ graph TB
     
     style REDIS_GLOBAL fill:#dc382d
     style REDIS_CACHE fill:#ff6b6b
-    style SCORE_SVC fill:#90EE90
+    style SCORE_SVC fill:#336791
     style KAFKA fill:#ff9900
 ```
 

@@ -452,8 +452,8 @@ graph TB
     AC1 & AC2 & AC3 --> METRICS
     TRIE1 & TRIE2 --> METRICS
     
-    style TRIE1 fill:#90EE90
-    style TRIE2 fill:#90EE90
+    style TRIE1 fill:#336791
+    style TRIE2 fill:#336791
     style REDIS1 fill:#dc382d
     style KAFKA fill:#ff9900
     style PG fill:#336791

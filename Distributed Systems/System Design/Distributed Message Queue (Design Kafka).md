@@ -649,9 +649,9 @@ graph TB
     
     style CTRL fill:#ff9900
     style ZK fill:#00bfff
-    style B1_LOG1 fill:#90EE90
-    style B2_LOG1 fill:#90EE90
-    style B3_LOG1 fill:#90EE90
+    style B1_LOG1 fill:#336791
+    style B2_LOG1 fill:#336791
+    style B3_LOG1 fill:#336791
     style B1_LOG4 fill:#FFB6C1
     style B2_LOG3 fill:#FFB6C1
     style B3_LOG3 fill:#FFB6C1

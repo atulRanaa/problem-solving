@@ -571,8 +571,8 @@ graph TB
     SCRAPER1 & SCRAPER2 -->|Send alerts| ALERTMGR
     ALERTMGR -->|Notify| SLACK & PAGER & EMAIL
     
-    style TSDB1 fill:#90EE90
-    style TSDB2 fill:#90EE90
+    style TSDB1 fill:#336791
+    style TSDB2 fill:#336791
     style LONGTERM fill:#87CEEB
     style ALERTMGR fill:#ff9900
 ```

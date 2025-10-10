@@ -364,9 +364,9 @@ graph TB
     RL1 & RL2 & RL3 --> METRICS
     METRICS --> GRAFANA
     
-    style RL1 fill:#90EE90
-    style RL2 fill:#90EE90
-    style RL3 fill:#90EE90
+    style RL1 fill:#336791
+    style RL2 fill:#336791
+    style RL3 fill:#336791
     style RC1 fill:#dc382d
     style RC2 fill:#dc382d
     style RC3 fill:#dc382d

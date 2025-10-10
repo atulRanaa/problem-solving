@@ -1064,7 +1064,7 @@ graph TB
     style LEDGER_SVC fill:#ff9900
     style PG_LEDGER fill:#4169E1
     style VAULT fill:#dc382d
-    style FRAUD_SVC fill:#90EE90
+    style FRAUD_SVC fill:#336791
     style KAFKA fill:#ff9900
 ```
 

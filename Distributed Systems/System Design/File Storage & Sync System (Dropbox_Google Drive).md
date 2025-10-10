@@ -715,7 +715,7 @@ graph TB
     METRICS --> DASHBOARD
     FILE_SVC --> LOGS
     
-    style S3_STORAGE fill:#90EE90
+    style S3_STORAGE fill:#336791
     style REDIS_CACHE fill:#dc382d
     style KAFKA fill:#ff9900
     style CHUNK_SVC fill:#ffa500

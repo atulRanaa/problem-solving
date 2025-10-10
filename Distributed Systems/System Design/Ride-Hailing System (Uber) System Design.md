@@ -1066,8 +1066,8 @@ graph TB
     
     CDN -->|Serve tiles| RIDER_APP & DRIVER_APP
     
-    style MATCHING_SVC fill:#90EE90
-    style LOCATION_SVC fill:#90EE90
+    style MATCHING_SVC fill:#336791
+    style LOCATION_SVC fill:#336791
     style REDIS_GEO fill:#dc382d
     style WS_MGR fill:#87CEEB
 ```

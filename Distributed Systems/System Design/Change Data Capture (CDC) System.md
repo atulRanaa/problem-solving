@@ -439,9 +439,9 @@ graph TB
     METRICS --> GRAFANA
     METRICS --> ALERT
     
-    style CONN1 fill:#90EE90
-    style CONN2 fill:#90EE90
-    style CONN3 fill:#90EE90
+    style CONN1 fill:#336791
+    style CONN2 fill:#336791
+    style CONN3 fill:#336791
     style KAFKA fill:#ff9900
     style OFFSET fill:#336791
 ```

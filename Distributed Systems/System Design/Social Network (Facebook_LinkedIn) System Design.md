@@ -1105,7 +1105,7 @@ graph TB
     CDN --> S3_PHOTOS
     CDN --> S3_VIDEOS
     
-    style FEED_SVC fill:#90EE90
+    style FEED_SVC fill:#336791
     style NEO4J fill:#4169E1
     style KAFKA fill:#ff9900
     style REDIS_CACHE fill:#dc382d

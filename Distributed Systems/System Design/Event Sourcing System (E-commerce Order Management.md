@@ -692,9 +692,9 @@ graph TB
     ORDER_PROJ --> MON
     QUERY_API --> MON
     
-    style ORDER_AGG fill:#90EE90
-    style PAYMENT_AGG fill:#90EE90
-    style INVENTORY_AGG fill:#90EE90
+    style ORDER_AGG fill:#336791
+    style PAYMENT_AGG fill:#336791
+    style INVENTORY_AGG fill:#336791
     style PG_EVENTS fill:#336791
     style KAFKA_EVENTS fill:#ff9900
     style READ_DB fill:#336791

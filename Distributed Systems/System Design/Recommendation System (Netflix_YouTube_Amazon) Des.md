@@ -802,7 +802,7 @@ graph TB
     METRICS --> DASHBOARD
     REC_API --> AB_PLATFORM
     
-    style DEEP_LEARNING fill:#90EE90
+    style DEEP_LEARNING fill:#336791
     style REDIS_CACHE fill:#dc382d
     style CANDIDATE_GEN fill:#ffa500
     style VECTOR_DB fill:#4169E1

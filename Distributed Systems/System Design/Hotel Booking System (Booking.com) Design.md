@@ -838,7 +838,7 @@ graph TB
     AVAILABILITY_SVC --> TRACING
     METRICS --> DASHBOARD
     
-    style INVENTORY_MGR fill:#90EE90
+    style INVENTORY_MGR fill:#336791
     style REDIS_CACHE fill:#dc382d
     style KAFKA fill:#ff9900
     style BOOKING_SVC fill:#ffa500

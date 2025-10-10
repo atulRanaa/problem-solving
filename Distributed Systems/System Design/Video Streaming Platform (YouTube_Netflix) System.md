@@ -1004,7 +1004,7 @@ graph TB
     UPLOAD1 & VIDEO_SVC & TRANSCODE1 --> METRICS
     UPLOAD1 & VIDEO_SVC --> LOGS
     
-    style TRANSCODE1 fill:#90EE90
+    style TRANSCODE1 fill:#336791
     style CDN_EDGE fill:#87CEEB
     style S3_PROCESSED fill:#ffa500
     style QUEUE fill:#ff9900

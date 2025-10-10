@@ -463,7 +463,7 @@ graph TB
     METRICS --> GRAFANA
     METRICS --> ALERT
     
-    style LEADER fill:#90EE90
+    style LEADER fill:#336791
     style FOLLOWER1 fill:#FFB6C1
     style FOLLOWER2 fill:#FFB6C1
     style REDIS fill:#dc382d

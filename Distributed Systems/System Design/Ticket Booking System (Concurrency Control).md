@@ -319,9 +319,7 @@ graph TB
     end
     
     subgraph "Application Servers"
-        APP1[Booking Service 1<br/>Stateless]
-        APP2[Booking Service 2]
-        APP3[Booking Service N]
+        APP1[Booking Service<br/>Stateless]
     end
     
     subgraph "Concurrency Control Layer"
@@ -353,27 +351,25 @@ graph TB
     end
     
     WEB & MOBILE --> LB
-    LB --> APP1 & APP2 & APP3
+    LB --> APP1
     
-    APP1 & APP2 & APP3 -->|Acquire lock| LOCK
-    APP1 & APP2 & APP3 -->|Check version| VERSION
+    APP1 -->|Acquire lock| LOCK
+    APP1 -->|Check version| VERSION
     
-    APP1 & APP2 & APP3 -->|Write| PG_MASTER
-    APP1 & APP2 & APP3 -->|Read| PG_REPLICA1 & PG_REPLICA2
+    APP1 -->|Write| PG_MASTER
+    APP1 -->|Read| PG_REPLICA1 & PG_REPLICA2
     
-    APP1 & APP2 & APP3 <-->|Cache check| REDIS
+    APP1 <-->|Cache check| REDIS
     
     PG_MASTER -->|Replicate| PG_REPLICA1 & PG_REPLICA2
     
     EXPIRE -->|Scan & release| PG_MASTER
     EXPIRE -->|Update cache| REDIS
     
-    APP1 & APP2 & APP3 -->|Process payment| PAYMENT
-    APP1 & APP2 & APP3 -->|Send confirmation| NOTIF
+    APP1 -->|Process payment| PAYMENT
+    APP1 -->|Send confirmation| NOTIF
     
-    style APP1 fill:#90EE90
-    style APP2 fill:#90EE90
-    style APP3 fill:#90EE90
+    style APP1 fill:#336791
     style LOCK fill:#ff9900
     style PG_MASTER fill:#336791
     style REDIS fill:#dc382d

@@ -1943,7 +1943,6 @@ Message delivery success: 99.9%
 | **Backend** | Erlang | C++ | Java | PHP + Go |
 
 This design handles **3 billion users** and **140 billion messages/day** with **<200ms delivery latency** using WebSocket, Erlang, Cassandra, and distributed architecture! 🚀
-<span style="display:none">[^10][^11][^12][^13][^14][^15][^16][^17][^18][^19][^4][^5][^6][^7][^8][^9]</span>
 
 <div align="center">⁂</div>
 

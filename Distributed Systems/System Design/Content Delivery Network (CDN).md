@@ -459,8 +459,8 @@ graph TB
     POP_US_WEST & POP_TOKYO --> METRICS
     API --> METRICS
     
-    style POP_US_WEST fill:#90EE90
-    style POP_TOKYO fill:#90EE90
+    style POP_US_WEST fill:#336791
+    style POP_TOKYO fill:#336791
     style SHIELD_NA fill:#87CEEB
     style ORIGIN1 fill:#FFB6C1
 ```

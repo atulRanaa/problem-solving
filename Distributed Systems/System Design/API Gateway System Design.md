@@ -647,7 +647,7 @@ graph TB
     ADMIN_API --> CONFIG_DB
     ADMIN_API --> GW1
     
-    style GW1 fill:#90EE90
+    style GW1 fill:#336791
     style RATELIMIT fill:#ffa500
     style REDIS_RATE fill:#dc382d
     style CIRCUIT fill:#ff9900

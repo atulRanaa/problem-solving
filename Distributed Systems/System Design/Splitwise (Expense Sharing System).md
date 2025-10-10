@@ -711,9 +711,9 @@ graph TB
     REMIND -->|Query| PG_REPLICA
     REMIND --> NOTIF
     
-    style EXPENSE fill:#90EE90
-    style BALANCE fill:#90EE90
-    style SETTLE fill:#90EE90
+    style EXPENSE fill:#336791
+    style BALANCE fill:#336791
+    style SETTLE fill:#336791
     style REDIS fill:#dc382d
     style PG_MASTER fill:#336791
 ```
