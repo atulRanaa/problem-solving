@@ -1,4 +1,4 @@
-// --- PROBLEM SOLVING DIRECTORY APP (MULTI-VIEW LAYOUT) --- //
+// --- PROBLEM SOLVING DIRECTORY APP (CLEAN, ELEGANT & ROBUST) --- //
 
 let allProblems = [];
 let filteredProblems = [];
@@ -6,21 +6,28 @@ let currentPage = 1;
 const pageSize = 24;
 
 let currentView = localStorage.getItem('catalogView') || 'editorial';
+let currentTab = 'catalog';
 
 let currentFilters = {
   platform: 'ALL',
   concept: 'ALL',
   lang: 'ALL',
+  difficulty: 'ALL',
   search: ''
 };
+
+let bookmarks = new Set(JSON.parse(localStorage.getItem('userBookmarks') || '[]'));
+let activeModalProblem = null;
 
 const GITHUB_RAW_BASE = "https://raw.githubusercontent.com/atulRanaa/problem-solving/main/";
 const GITHUB_REPO_BASE = "https://github.com/atulRanaa/problem-solving/blob/main/";
 
 document.addEventListener('DOMContentLoaded', () => {
   initTheme();
+  initNavTabs();
   initLayoutSwitcher();
   setupKeyboardShortcuts();
+  setupCmdKPalette();
   loadProblems();
   setupEventListeners();
 });
@@ -30,18 +37,45 @@ function initTheme() {
   const savedTheme = localStorage.getItem('theme') || 'dark';
   document.documentElement.setAttribute('data-theme', savedTheme);
   
-  document.getElementById('theme-toggle').addEventListener('click', () => {
-    const current = document.documentElement.getAttribute('data-theme');
-    const next = current === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', next);
-    localStorage.setItem('theme', next);
+  const themeBtn = document.getElementById('theme-toggle');
+  if (themeBtn) {
+    themeBtn.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme');
+      const next = current === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+    });
+  }
+}
+
+// Nav Tabs (All Problems | Bookmarks)
+function initNavTabs() {
+  document.querySelectorAll('.nav-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      currentTab = tab.dataset.tab;
+      document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+
+      document.querySelectorAll('.tab-page').forEach(page => {
+        page.hidden = (page.id !== `tab-content-${currentTab}`);
+      });
+
+      const filterSec = document.getElementById('filter-section');
+      if (filterSec) {
+        filterSec.style.display = (currentTab === 'catalog') ? 'flex' : 'none';
+      }
+
+      if (currentTab === 'bookmarks') renderBookmarks();
+    });
   });
 }
 
 // Layout Switcher
 function initLayoutSwitcher() {
   const container = document.getElementById('problems-container');
-  container.className = `problems-view view-${currentView}`;
+  if (container) {
+    container.className = `problems-view view-${currentView}`;
+  }
 
   document.querySelectorAll('.layout-btn').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.view === currentView);
@@ -51,23 +85,99 @@ function initLayoutSwitcher() {
       document.querySelectorAll('.layout-btn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
 
-      container.className = `problems-view view-${currentView}`;
+      if (container) {
+        container.className = `problems-view view-${currentView}`;
+      }
       currentPage = 1;
       renderProblems(false);
     });
   });
 }
 
-// Keyboard Shortcuts
+// Keyboard Shortcuts & Cmd+K Command Palette
 function setupKeyboardShortcuts() {
   document.addEventListener('keydown', (e) => {
-    if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      toggleCmdK(true);
+    } else if (e.key === 'Escape') {
+      toggleCmdK(false);
+      closeModal();
+    } else if (e.key === '/' && document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
       e.preventDefault();
       const input = document.getElementById('search-input');
-      input.focus();
-      input.select();
+      if (input) {
+        input.focus();
+        input.select();
+      }
     }
   });
+}
+
+function setupCmdKPalette() {
+  const trigger = document.getElementById('cmd-k-trigger');
+  const backdrop = document.getElementById('cmd-k-backdrop');
+  const input = document.getElementById('cmd-k-input');
+  const resultsContainer = document.getElementById('cmd-k-results');
+
+  if (trigger) trigger.addEventListener('click', () => toggleCmdK(true));
+  if (backdrop) {
+    backdrop.addEventListener('click', (e) => {
+      if (e.target === backdrop) toggleCmdK(false);
+    });
+  }
+
+  if (input) {
+    input.addEventListener('input', (e) => {
+      if (!resultsContainer) return;
+      const q = e.target.value.trim().toLowerCase();
+      if (!q) {
+        resultsContainer.innerHTML = '<div class="cmd-k-item"><span class="cmd-k-meta">Type to search solutions...</span></div>';
+        return;
+      }
+
+      const matches = allProblems.filter(p => 
+        p.title.toLowerCase().includes(q) ||
+        p.platform.toLowerCase().includes(q) ||
+        p.concepts.some(c => c.toLowerCase().includes(q))
+      ).slice(0, 10);
+
+      if (matches.length === 0) {
+        resultsContainer.innerHTML = '<div class="cmd-k-item"><span class="cmd-k-meta">No matching solutions found</span></div>';
+        return;
+      }
+
+      resultsContainer.innerHTML = matches.map(p => `
+        <div class="cmd-k-item" data-id="${p.id}">
+          <span class="cmd-k-title">${escapeHtml(p.title)}</span>
+          <span class="cmd-k-meta">${escapeHtml(p.platform)} • ${escapeHtml(p.language)}</span>
+        </div>
+      `).join('');
+
+      resultsContainer.querySelectorAll('.cmd-k-item').forEach(item => {
+        item.addEventListener('click', () => {
+          const id = item.dataset.id;
+          const prob = allProblems.find(p => p.id === id);
+          if (prob) {
+            toggleCmdK(false);
+            openCodeModal(prob);
+          }
+        });
+      });
+    });
+  }
+}
+
+function toggleCmdK(show) {
+  const backdrop = document.getElementById('cmd-k-backdrop');
+  const input = document.getElementById('cmd-k-input');
+  if (backdrop) backdrop.hidden = !show;
+  if (show && input) {
+    input.value = '';
+    input.focus();
+    const res = document.getElementById('cmd-k-results');
+    if (res) res.innerHTML = '<div class="cmd-k-item"><span class="cmd-k-meta">Type to search solutions...</span></div>';
+  }
 }
 
 // Fetch Problems JSON
@@ -77,31 +187,19 @@ async function loadProblems() {
     if (!res.ok) throw new Error('Failed to load problems data');
     allProblems = await res.json();
     
-    updateStatsBar();
     buildFilterButtons();
     applyFilters();
   } catch (err) {
     console.error('Error loading problems:', err);
-    document.getElementById('problems-container').innerHTML = `
-      <div class="empty-state">
-        <p>Error loading problem database. Please ensure data/problems.json is present.</p>
-      </div>
-    `;
+    const container = document.getElementById('problems-container');
+    if (container) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <p>Error loading problem database. Please ensure data/problems.json is present.</p>
+        </div>
+      `;
+    }
   }
-}
-
-// Update Stats Dashboard
-function updateStatsBar() {
-  const total = allProblems.length;
-  const platforms = new Set(allProblems.map(p => p.platform)).size;
-  const concepts = new Set(allProblems.flatMap(p => p.concepts)).size;
-  const sysdesigns = allProblems.filter(p => p.platform === 'System Design' || p.concepts.includes('System Design')).length;
-
-  document.getElementById('stat-total').textContent = total.toLocaleString();
-  document.getElementById('stat-platforms').textContent = `${platforms}+`;
-  document.getElementById('stat-concepts').textContent = concepts;
-  document.getElementById('stat-sysdesign').textContent = sysdesigns;
-  document.getElementById('total-badge').textContent = `${total.toLocaleString()} Problems`;
 }
 
 // Build Filter Pills Dynamically
@@ -112,18 +210,19 @@ function buildFilterButtons() {
     platformCounts[p.platform] = (platformCounts[p.platform] || 0) + 1;
   });
 
-  const topPlatforms = Object.entries(platformCounts)
-    .sort((a, b) => b[1] - a[1]);
-
   const platformContainer = document.getElementById('platform-filters');
-  topPlatforms.forEach(([plat, count]) => {
-    const btn = document.createElement('button');
-    btn.className = 'filter-btn';
-    btn.dataset.filterType = 'platform';
-    btn.dataset.value = plat;
-    btn.textContent = `${plat} (${count})`;
-    platformContainer.appendChild(btn);
-  });
+  if (platformContainer) {
+    Object.entries(platformCounts)
+      .sort((a, b) => b[1] - a[1])
+      .forEach(([plat, count]) => {
+        const btn = document.createElement('button');
+        btn.className = 'filter-btn';
+        btn.dataset.filterType = 'platform';
+        btn.dataset.value = plat;
+        btn.textContent = `${plat} (${count})`;
+        platformContainer.appendChild(btn);
+      });
+  }
 
   // Concept pills
   const conceptCounts = {};
@@ -133,36 +232,19 @@ function buildFilterButtons() {
     });
   });
 
-  const sortedConcepts = Object.entries(conceptCounts)
-    .sort((a, b) => b[1] - a[1]);
-
   const conceptContainer = document.getElementById('concept-filters');
-  sortedConcepts.forEach(([conc, count]) => {
-    const btn = document.createElement('button');
-    btn.className = 'filter-btn';
-    btn.dataset.filterType = 'concept';
-    btn.dataset.value = conc;
-    btn.textContent = `${conc} (${count})`;
-    conceptContainer.appendChild(btn);
-  });
-
-  // Language pills
-  const langCounts = {};
-  allProblems.forEach(p => {
-    langCounts[p.language] = (langCounts[p.language] || 0) + 1;
-  });
-
-  const langContainer = document.getElementById('lang-filters');
-  Object.entries(langCounts)
-    .sort((a, b) => b[1] - a[1])
-    .forEach(([lang, count]) => {
-      const btn = document.createElement('button');
-      btn.className = 'filter-btn';
-      btn.dataset.filterType = 'lang';
-      btn.dataset.value = lang;
-      btn.textContent = `${lang} (${count})`;
-      langContainer.appendChild(btn);
-    });
+  if (conceptContainer) {
+    Object.entries(conceptCounts)
+      .sort((a, b) => b[1] - a[1])
+      .forEach(([conc, count]) => {
+        const btn = document.createElement('button');
+        btn.className = 'filter-btn';
+        btn.dataset.filterType = 'concept';
+        btn.dataset.value = conc;
+        btn.textContent = `${conc} (${count})`;
+        conceptContainer.appendChild(btn);
+      });
+  }
 }
 
 // Event Listeners Setup
@@ -171,74 +253,88 @@ function setupEventListeners() {
   const clearSearch = document.getElementById('clear-search');
 
   let debounceTimer;
-  searchInput.addEventListener('input', (e) => {
-    clearTimeout(debounceTimer);
-    const query = e.target.value.trim();
-    clearSearch.hidden = !query;
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      clearTimeout(debounceTimer);
+      const query = e.target.value.trim();
+      if (clearSearch) clearSearch.hidden = !query;
 
-    debounceTimer = setTimeout(() => {
-      currentFilters.search = query.toLowerCase();
+      debounceTimer = setTimeout(() => {
+        currentFilters.search = query.toLowerCase();
+        applyFilters();
+      }, 180);
+    });
+  }
+
+  if (clearSearch) {
+    clearSearch.addEventListener('click', () => {
+      if (searchInput) searchInput.value = '';
+      clearSearch.hidden = true;
+      currentFilters.search = '';
       applyFilters();
-    }, 180);
-  });
-
-  clearSearch.addEventListener('click', () => {
-    searchInput.value = '';
-    clearSearch.hidden = true;
-    currentFilters.search = '';
-    applyFilters();
-  });
+    });
+  }
 
   // Filter button clicks
-  document.querySelector('.filter-groups').addEventListener('click', (e) => {
-    const btn = e.target.closest('.filter-btn');
-    if (!btn) return;
+  const filterSection = document.getElementById('filter-section');
+  if (filterSection) {
+    filterSection.addEventListener('click', (e) => {
+      const btn = e.target.closest('.filter-btn');
+      if (!btn) return;
 
-    const type = btn.dataset.filterType;
-    const value = btn.dataset.value;
+      const type = btn.dataset.filterType;
+      const value = btn.dataset.value;
 
-    const group = btn.closest('.filter-pills');
-    group.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
+      const group = btn.closest('.filter-pills');
+      if (group) {
+        group.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      }
+      btn.classList.add('active');
 
-    currentFilters[type] = value;
-    applyFilters();
-  });
-
-  // Stat pill click shortcuts
-  document.getElementById('stats-bar').addEventListener('click', (e) => {
-    const pill = e.target.closest('.stat-pill');
-    if (!pill) return;
-    const stat = pill.dataset.stat;
-    if (stat === 'sysdesign') {
-      filterByConcept('System Design');
-    } else if (stat === 'all') {
-      resetAllFilters();
-    }
-  });
+      currentFilters[type] = value;
+      applyFilters();
+    });
+  }
 
   // Load More Button
-  document.getElementById('load-more-btn').addEventListener('click', () => {
-    currentPage++;
-    renderProblems(true);
-  });
+  const loadMoreBtn = document.getElementById('load-more-btn');
+  if (loadMoreBtn) {
+    loadMoreBtn.addEventListener('click', () => {
+      currentPage++;
+      renderProblems(true);
+    });
+  }
 
   // Reset all filters button
-  document.getElementById('reset-all-filters').addEventListener('click', resetAllFilters);
+  const resetBtn = document.getElementById('reset-all-filters');
+  if (resetBtn) {
+    resetBtn.addEventListener('click', resetAllFilters);
+  }
 
   // Modal events
-  document.getElementById('close-modal-btn').addEventListener('click', closeModal);
-  document.getElementById('code-modal-backdrop').addEventListener('click', (e) => {
-    if (e.target === e.currentTarget) closeModal();
-  });
+  const closeBtn = document.getElementById('close-modal-btn');
+  if (closeBtn) closeBtn.addEventListener('click', closeModal);
 
-  document.getElementById('copy-code-btn').addEventListener('click', copyCodeToClipboard);
+  const backdrop = document.getElementById('code-modal-backdrop');
+  if (backdrop) {
+    backdrop.addEventListener('click', (e) => {
+      if (e.target === backdrop) closeModal();
+    });
+  }
+
+  const copyBtn = document.getElementById('copy-code-btn');
+  if (copyBtn) copyBtn.addEventListener('click', copyCodeToClipboard);
+
+  const bookmarkBtn = document.getElementById('bookmark-btn');
+  if (bookmarkBtn) bookmarkBtn.addEventListener('click', toggleBookmarkActiveModal);
 }
 
 function resetAllFilters() {
-  currentFilters = { platform: 'ALL', concept: 'ALL', lang: 'ALL', search: '' };
-  document.getElementById('search-input').value = '';
-  document.getElementById('clear-search').hidden = true;
+  currentFilters = { platform: 'ALL', concept: 'ALL', lang: 'ALL', difficulty: 'ALL', search: '' };
+  const input = document.getElementById('search-input');
+  if (input) input.value = '';
+  const clear = document.getElementById('clear-search');
+  if (clear) clear.hidden = true;
 
   document.querySelectorAll('.filter-btn').forEach(b => {
     b.classList.toggle('active', b.dataset.value === 'ALL');
@@ -250,24 +346,27 @@ function resetAllFilters() {
 function filterByConcept(conceptName) {
   currentFilters.concept = conceptName;
   const container = document.getElementById('concept-filters');
-  container.querySelectorAll('.filter-btn').forEach(b => {
-    b.classList.toggle('active', b.dataset.value === conceptName);
-  });
+  if (container) {
+    container.querySelectorAll('.filter-btn').forEach(b => {
+      b.classList.toggle('active', b.dataset.value === conceptName);
+    });
+  }
+  
+  if (currentTab !== 'catalog') {
+    const catalogTab = document.querySelector('.nav-tab[data-tab="catalog"]');
+    if (catalogTab) catalogTab.click();
+  }
+  
   applyFilters();
 }
 
 // Filter Logic
 function applyFilters() {
   filteredProblems = allProblems.filter(p => {
-    if (currentFilters.platform !== 'ALL' && p.platform !== currentFilters.platform) {
-      return false;
-    }
-    if (currentFilters.concept !== 'ALL' && !p.concepts.includes(currentFilters.concept)) {
-      return false;
-    }
-    if (currentFilters.lang !== 'ALL' && p.language !== currentFilters.lang) {
-      return false;
-    }
+    if (currentFilters.platform !== 'ALL' && p.platform !== currentFilters.platform) return false;
+    if (currentFilters.concept !== 'ALL' && !p.concepts.includes(currentFilters.concept)) return false;
+    if (currentFilters.lang !== 'ALL' && p.language !== currentFilters.lang) return false;
+    if (currentFilters.difficulty !== 'ALL' && p.difficulty !== currentFilters.difficulty) return false;
 
     if (currentFilters.search) {
       const q = currentFilters.search;
@@ -293,12 +392,16 @@ function applyFilters() {
 // Update Active Filters Header
 function updateResultsHeader() {
   const countEl = document.getElementById('results-count');
-  countEl.textContent = `Showing ${filteredProblems.length.toLocaleString()} of ${allProblems.length.toLocaleString()} problems`;
+  if (countEl) {
+    countEl.textContent = `Showing ${filteredProblems.length.toLocaleString()} solutions`;
+  }
 
   const tagsBar = document.getElementById('active-filters-bar');
+  if (!tagsBar) return;
   tagsBar.innerHTML = '';
 
   const active = [];
+  if (currentFilters.difficulty !== 'ALL') active.push(`Diff: ${currentFilters.difficulty}`);
   if (currentFilters.platform !== 'ALL') active.push(`Platform: ${currentFilters.platform}`);
   if (currentFilters.concept !== 'ALL') active.push(`Concept: ${currentFilters.concept}`);
   if (currentFilters.lang !== 'ALL') active.push(`Lang: ${currentFilters.lang}`);
@@ -309,13 +412,16 @@ function updateResultsHeader() {
     pill.className = 'concept-tag';
     pill.textContent = `${tagText} ×`;
     pill.addEventListener('click', () => {
+      if (tagText.startsWith('Diff:')) currentFilters.difficulty = 'ALL';
       if (tagText.startsWith('Platform:')) currentFilters.platform = 'ALL';
       if (tagText.startsWith('Concept:')) currentFilters.concept = 'ALL';
       if (tagText.startsWith('Lang:')) currentFilters.lang = 'ALL';
       if (tagText.startsWith('Search:')) {
         currentFilters.search = '';
-        document.getElementById('search-input').value = '';
-        document.getElementById('clear-search').hidden = true;
+        const input = document.getElementById('search-input');
+        if (input) input.value = '';
+        const clear = document.getElementById('clear-search');
+        if (clear) clear.hidden = true;
       }
       syncFilterPills();
       applyFilters();
@@ -325,7 +431,7 @@ function updateResultsHeader() {
 }
 
 function syncFilterPills() {
-  ['platform', 'concept', 'lang'].forEach(type => {
+  ['difficulty', 'platform', 'concept', 'lang'].forEach(type => {
     const val = currentFilters[type];
     const container = document.getElementById(`${type}-filters`);
     if (container) {
@@ -336,23 +442,26 @@ function syncFilterPills() {
   });
 }
 
-// Render Problems Container (Editorial, Cards, or Table)
+// Render Problems Container
 function renderProblems(append = false) {
   const container = document.getElementById('problems-container');
   const emptyState = document.getElementById('empty-state');
+  const pag = document.getElementById('pagination-container');
+
+  if (!container) return;
 
   if (!append) {
     container.innerHTML = '';
   }
 
   if (filteredProblems.length === 0) {
-    emptyState.hidden = false;
+    if (emptyState) emptyState.hidden = false;
     container.innerHTML = '';
-    document.getElementById('pagination-container').hidden = true;
+    if (pag) pag.hidden = true;
     return;
   }
 
-  emptyState.hidden = true;
+  if (emptyState) emptyState.hidden = true;
 
   const startIndex = (currentPage - 1) * pageSize;
   const endIndex = currentPage * pageSize;
@@ -367,20 +476,25 @@ function renderProblems(append = false) {
   }
 
   const hasMore = endIndex < filteredProblems.length;
-  document.getElementById('pagination-container').hidden = !hasMore;
+  if (pag) pag.hidden = !hasMore;
 }
 
-// 📰 EDITORIAL LIST VIEW RENDERER (tdd.cat inspired)
+// EDITORIAL LIST VIEW RENDERER
 function renderEditorialView(container, pageSlice) {
   pageSlice.forEach(prob => {
     const row = document.createElement('div');
     row.className = 'editorial-row';
 
+    const isBookmarked = bookmarks.has(prob.id);
+
     row.innerHTML = `
       <span class="editorial-platform">${escapeHtml(prob.platform)}</span>
 
       <div class="editorial-main">
-        <a href="#" class="editorial-title view-code-link" data-id="${prob.id}">${escapeHtml(prob.title)}</a>
+        <div>
+          <a href="#" class="editorial-title view-code-link" data-id="${prob.id}">${escapeHtml(prob.title)}</a>
+          <span class="diff-badge ${prob.difficulty}">${prob.difficulty}</span>
+        </div>
         <div class="editorial-concepts">
           ${prob.concepts.map(c => `<span class="concept-tag" data-concept="${escapeHtml(c)}">${escapeHtml(c)}</span>`).join('')}
           <span class="lang-tag">• ${escapeHtml(prob.language)} (${prob.lineCount} lines)</span>
@@ -388,6 +502,7 @@ function renderEditorialView(container, pageSlice) {
       </div>
 
       <div class="editorial-actions">
+        <button class="action-btn star-btn" data-id="${prob.id}">${isBookmarked ? '⭐' : '☆'}</button>
         <button class="action-btn primary view-code-btn" data-id="${prob.id}">View Code ↗</button>
         <a href="${prob.problemUrl}" target="_blank" rel="noopener" class="action-btn" title="Open Problem">🔗</a>
       </div>
@@ -400,6 +515,11 @@ function renderEditorialView(container, pageSlice) {
       });
     });
 
+    row.querySelector('.star-btn').addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleBookmark(prob.id, e.target);
+    });
+
     row.querySelector('.view-code-btn').addEventListener('click', () => openCodeModal(prob));
     row.querySelector('.view-code-link').addEventListener('click', (e) => {
       e.preventDefault();
@@ -410,7 +530,7 @@ function renderEditorialView(container, pageSlice) {
   });
 }
 
-// 🎴 MINIMAL CARDS GRID RENDERER
+// MINIMAL CARDS GRID RENDERER
 function renderGridView(container, pageSlice) {
   pageSlice.forEach(prob => {
     const card = document.createElement('article');
@@ -419,19 +539,22 @@ function renderGridView(container, pageSlice) {
     card.innerHTML = `
       <div class="card-top">
         <div class="card-header-meta">
-          <span class="platform-badge">${escapeHtml(prob.platform)}</span>
-          <span class="lang-badge">${escapeHtml(prob.language)}</span>
+          <span class="editorial-platform">${escapeHtml(prob.platform)}</span>
+          <div>
+            <span class="diff-badge ${prob.difficulty}">${prob.difficulty}</span>
+          </div>
         </div>
         <h3 class="problem-title">${escapeHtml(prob.title)}</h3>
-        <div class="concept-tags">
+        <div class="editorial-concepts">
           ${prob.concepts.map(c => `<span class="concept-tag" data-concept="${escapeHtml(c)}">${escapeHtml(c)}</span>`).join('')}
         </div>
       </div>
 
       <div class="card-footer">
-        <div class="card-actions">
+        <span class="lang-tag">${escapeHtml(prob.language)}</span>
+        <div style="display:flex;gap:0.35rem;">
           <button class="action-btn primary view-code-btn" data-id="${prob.id}">View Code</button>
-          <a href="${prob.problemUrl}" target="_blank" rel="noopener" class="action-btn">Problem ↗</a>
+          <a href="${prob.problemUrl}" target="_blank" rel="noopener" class="action-btn">🔗</a>
         </div>
       </div>
     `;
@@ -448,7 +571,7 @@ function renderGridView(container, pageSlice) {
   });
 }
 
-// 📊 COMPACT TABLE VIEW RENDERER
+// COMPACT TABLE VIEW RENDERER
 function renderTableView(container, pageSlice, append) {
   let table = container.querySelector('table');
   if (!table || !append) {
@@ -458,6 +581,7 @@ function renderTableView(container, pageSlice, append) {
           <tr>
             <th>Platform</th>
             <th>Problem Title</th>
+            <th>Diff</th>
             <th>Algorithms & Data Structures</th>
             <th>Lang</th>
             <th>Actions</th>
@@ -474,10 +598,11 @@ function renderTableView(container, pageSlice, append) {
   pageSlice.forEach(prob => {
     const tr = document.createElement('tr');
     tr.innerHTML = `
-      <td><span class="platform-badge">${escapeHtml(prob.platform)}</span></td>
+      <td><span class="editorial-platform">${escapeHtml(prob.platform)}</span></td>
       <td><strong><a href="#" class="view-code-link" style="color:var(--text-heading);text-decoration:none;">${escapeHtml(prob.title)}</a></strong></td>
+      <td><span class="diff-badge ${prob.difficulty}">${prob.difficulty}</span></td>
       <td>
-        <div class="concept-tags">
+        <div class="editorial-concepts">
           ${prob.concepts.map(c => `<span class="concept-tag" data-concept="${escapeHtml(c)}">${escapeHtml(c)}</span>`).join('')}
         </div>
       </td>
@@ -507,49 +632,107 @@ function renderTableView(container, pageSlice, append) {
   });
 }
 
+// ⭐ RENDER BOOKMARKS
+function renderBookmarks() {
+  const container = document.getElementById('bookmarks-container');
+  if (!container) return;
+  container.innerHTML = '';
+
+  const bookmarkedProbs = allProblems.filter(p => bookmarks.has(p.id));
+
+  if (bookmarkedProbs.length === 0) {
+    container.innerHTML = '<div class="empty-state"><p>No bookmarked problems yet. Click the ⭐ star button on any problem to save it here!</p></div>';
+    return;
+  }
+
+  renderEditorialView(container, bookmarkedProbs);
+}
+
+function toggleBookmark(probId, btnEl) {
+  if (bookmarks.has(probId)) {
+    bookmarks.delete(probId);
+    if (btnEl) btnEl.textContent = '☆';
+  } else {
+    bookmarks.add(probId);
+    if (btnEl) btnEl.textContent = '⭐';
+  }
+  localStorage.setItem('userBookmarks', JSON.stringify(Array.from(bookmarks)));
+}
+
+function toggleBookmarkActiveModal() {
+  if (!activeModalProblem) return;
+  toggleBookmark(activeModalProblem.id, null);
+  const btn = document.getElementById('bookmark-btn');
+  if (btn) {
+    const isBookmarked = bookmarks.has(activeModalProblem.id);
+    btn.textContent = isBookmarked ? '⭐ Bookmarked' : '☆ Bookmark';
+  }
+}
+
 // Code Viewer Modal Drawer
 async function openCodeModal(prob) {
+  activeModalProblem = prob;
   const modal = document.getElementById('code-modal-backdrop');
-  document.getElementById('modal-title').textContent = prob.title;
-  document.getElementById('modal-filepath').textContent = prob.filePath;
+  const title = document.getElementById('modal-title');
+  const filepath = document.getElementById('modal-filepath');
+  
+  if (title) title.textContent = prob.title;
+  if (filepath) filepath.textContent = prob.filePath;
   
   const badgesContainer = document.getElementById('modal-badges');
-  badgesContainer.innerHTML = `
-    <span class="platform-badge">${escapeHtml(prob.platform)}</span>
-    <span class="lang-badge">${escapeHtml(prob.language)}</span>
-  `;
+  if (badgesContainer) {
+    badgesContainer.innerHTML = `
+      <span class="editorial-platform">${escapeHtml(prob.platform)}</span>
+      <span class="diff-badge ${prob.difficulty}">${prob.difficulty}</span>
+      <span class="lang-tag">${escapeHtml(prob.language)}</span>
+    `;
+  }
 
-  document.getElementById('modal-github-link').href = `${GITHUB_REPO_BASE}${encodeURIComponent(prob.filePath)}`;
-  document.getElementById('modal-problem-link').href = prob.problemUrl;
+  const bookmarkBtn = document.getElementById('bookmark-btn');
+  if (bookmarkBtn) {
+    bookmarkBtn.textContent = bookmarks.has(prob.id) ? '⭐ Bookmarked' : '☆ Bookmark';
+  }
+
+  const ghLink = document.getElementById('modal-github-link');
+  if (ghLink) ghLink.href = `${GITHUB_REPO_BASE}${encodeURIComponent(prob.filePath)}`;
+
+  const probLink = document.getElementById('modal-problem-link');
+  if (probLink) probLink.href = prob.problemUrl;
 
   const codeEl = document.getElementById('modal-code-content');
-  codeEl.textContent = 'Loading source code from repository...';
-  modal.hidden = false;
+  if (codeEl) codeEl.textContent = 'Loading source code...';
+
+  if (modal) modal.hidden = false;
 
   try {
     const rawUrl = `${GITHUB_RAW_BASE}${encodeURIComponent(prob.filePath)}`;
     const res = await fetch(rawUrl);
     if (res.ok) {
       const codeText = await res.text();
-      codeEl.textContent = codeText;
+      if (codeEl) codeEl.textContent = codeText;
     } else {
-      codeEl.textContent = prob.snippet + '\n\n// [Full file preview dynamically available when hosted on GitHub]';
+      if (codeEl) codeEl.textContent = prob.snippet;
     }
   } catch (err) {
-    codeEl.textContent = prob.snippet + '\n\n// [Preview snippet shown above]';
+    if (codeEl) codeEl.textContent = prob.snippet;
   }
 }
 
 function closeModal() {
-  document.getElementById('code-modal-backdrop').hidden = true;
+  const modal = document.getElementById('code-modal-backdrop');
+  if (modal) modal.hidden = true;
+  activeModalProblem = null;
 }
 
 function copyCodeToClipboard() {
-  const codeText = document.getElementById('modal-code-content').textContent;
-  navigator.clipboard.writeText(codeText).then(() => {
+  const codeEl = document.getElementById('modal-code-content');
+  if (!codeEl) return;
+  navigator.clipboard.writeText(codeEl.textContent).then(() => {
     const btn = document.getElementById('copy-code-btn');
-    btn.textContent = '✅ Copied!';
-    setTimeout(() => btn.textContent = '📋 Copy Code', 2000);
+    if (btn) {
+      btn.textContent = '✅ Copied!';
+      setTimeout(() => btn.textContent = 'Copy Code', 2000);
+    }
   });
 }
 

@@ -282,6 +282,34 @@ def infer_concepts(filename, rel_path, content):
         
     return sorted(list(matched))
 
+def infer_difficulty(filename, concepts, line_count):
+    hard_tags = {"Heavy-Light Decomposition (HLD)", "Suffix Array / Tree", "Dijkstra Algorithm", "Segment Tree", "Bitmask DP", "Matrix Exponentiation", "Computational Geometry", "Lowest Common Ancestor (LCA)"}
+    medium_tags = {"DFS / BFS Graph Traversal", "Binary Search", "Trie (Prefix Tree)", "Disjoint Set Union (DSU)", "Dynamic Programming", "Sieve of Eratosthenes", "Fenwick Tree (BIT)", "Subsequence DP (LCS / LIS)", "Monotonic Stack / Queue"}
+    
+    concept_set = set(concepts)
+    if concept_set.intersection(hard_tags) or line_count > 70:
+        return "Hard"
+    elif concept_set.intersection(medium_tags) or line_count > 35:
+        return "Medium"
+    else:
+        return "Easy"
+
+def infer_complexity(concepts):
+    if "Segment Tree" in concepts or "Fenwick Tree (BIT)" in concepts:
+        return {"time": "O(N log N)", "space": "O(N)"}
+    elif "Dijkstra Algorithm" in concepts or "DFS / BFS Graph Traversal" in concepts:
+        return {"time": "O((V + E) log V)", "space": "O(V + E)"}
+    elif "Binary Search" in concepts:
+        return {"time": "O(log N)", "space": "O(1)"}
+    elif "Dynamic Programming" in concepts or "Subsequence DP (LCS / LIS)" in concepts:
+        return {"time": "O(N²)", "space": "O(N²)"}
+    elif "GCD & Euclidean Algo" in concepts or "Sieve of Eratosthenes" in concepts:
+        return {"time": "O(N log log N)", "space": "O(N)"}
+    elif "System Design" in concepts:
+        return {"time": "Distributed", "space": "Scalable"}
+    else:
+        return {"time": "O(N)", "space": "O(1)"}
+
 def extract_meaningful_snippet(content):
     lines = content.splitlines()
     meaningful = []
@@ -382,6 +410,9 @@ def scan_problems():
             snippet = extract_meaningful_snippet(content)
             
             lines = [line for line in content.splitlines() if line.strip()]
+            line_count = len(lines)
+            difficulty = infer_difficulty(f, concepts, line_count)
+            complexity = infer_complexity(concepts)
             
             problem_entry = {
                 "id": f"prob-{id_counter}",
@@ -391,16 +422,18 @@ def scan_problems():
                 "platform": platform,
                 "language": language,
                 "concepts": concepts,
+                "difficulty": difficulty,
+                "complexity": complexity,
                 "status": status,
                 "problemUrl": problem_url,
                 "snippet": snippet,
-                "lineCount": len(lines)
+                "lineCount": line_count
             }
             
             problems.append(problem_entry)
             id_counter += 1
             
-    print(f"Successfully indexed {len(problems)} problems with rich concept tags.")
+    print(f"Successfully indexed {len(problems)} problems with difficulty and complexity metadata.")
     
     os.makedirs(os.path.dirname(OUTPUT_JSON), exist_ok=True)
     with open(OUTPUT_JSON, 'w', encoding='utf-8') as f:
