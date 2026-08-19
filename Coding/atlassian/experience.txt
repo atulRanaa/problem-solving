@@ -1,0 +1,230 @@
+Round 1 & 2
+Data Structures Question Bank
+
+Find the closest Org for target Employees
+a) Imagine you are the team that maintains the Atlassian employee directory. At Atlassian – there are multiple groups, and each can have one or more groups. Every employee is part of a group. You are tasked with designing a system that could find the closest common parent group giv a target set of employees in the organization.
+b) The Atlassian hierarchy sometimes can have shared group across an org or employees shared across different groups – How will the code evolve n this case if the requirement is to provide ONE closest common group
+c) The system now introduced 4 methods to update the structure of the hierarchy in the org. Supose these dynamic updates are done in separate threads while getCommonGroupForEmployees is being called, How ill your system handled reads and writes into the system efficiently such that at any given time getCommonGroupForEmployees always reflects the latest updated state of the hierarchy?
+d) The company consists of a single level of groups with no subgroups. Each group has a set of employees.
+
+Expanding Tennis Club
+a) Implement a function that given a list of tennis court cookings with start and finish times, returns a plan assigning each booking to a specific court, ensuring each court is used by only one booking at a time and using the minimum amount of courts with unlimites number of courts available.
+An example of the booking record might look like
+
+Class BookingRecord:
+Id: int//ID of the booking
+Start_time: int
+Finish_time: int
+
+And our function is going to look like:
+
+List assignCourts(List bookingRecords)
+
+b) After each booking, a fixed amount of time, X, is needed to maintain the court before it can be rented again
+c) Court only need maintainenece after X amount of usage
+How would you modify the code if each court also had a Y maintainence time that occurred after X bookings?
+The function should now become something like
+Def assign_court_with_maintainence(booking_records: list{BookingRecord],
+
+Maintainence_time: int,
+
+Durability: int) -> list[Court]:
+d) The original problem can be made simpler by removing the “assigning each booking to a specific court” part. The candidate needs to find the minimum number of courts needed to accommodate all the bookings
+e) Check if booking conflict - Write a function that if given two bookings to check if they conflict with each other
+
+Commodity Prices
+Imagine you are given a stream of data points consisting of <timestamp, commodityPrice> you are supposed to return the maxCommodityPrice at any point in time.
+The timestamps in the stream can be out of order, or there can be duplicate timestamps, we need to update the commodityPrice at that particular timestamp if an entry for the timestamp already exists
+Create an in-memory solution tailored to prioritize frequent reads and writes for the given problem statement
+Can we reduce the time complexity of the getMaxCommodityPrice to O(1) if the language does not support it? This can be done using a variable to keep the maxPrice value, but we need to update it when performing the upsert operations.
+
+Popular content
+Imagine you are given a stream of content ids along with an associated action to be performed on them
+Example of contents are video, pages, posts etc. There cam be two actions associated with a content id:
+• increasePopularity -> increases the popularity of the content by 1. The popularity increases when someone comments on the content or likes the comtent
+• decreasePopularity-> decreases the popularity of the content by 1. The popularity decreases when a spam bot’s/users comments are deleted from the content or its likes are removed from the content
+• content ids are positive integers
+Implement a class that can return the mostPopular content id at any time while consuming the stream of content ids and its associated action. If there are no contentIds with popularity greater than 0, return -1
+Code Design Question Bank
+
+Customer Satisfaction
+a) Imagine we have a customer support ticketing system. The system allows customers to rate the support agent out of 5. To start with, write a function which accepts a rating, and another which will show me all of the agents and the average ratingeach one has received, ordered highest to lowest.
+b) Currently your solution does not account for what happens if two agents have the same average rating. What options are there for handling ties and how can we implement that in code?
+c) Now I want to be able to see who the best agents are each month. Change the implementation so I can get that information.
+d) Write a new function that will allow me to export of each agent’s average ratings per month. You can export in any format you like- for example csv,json or xml.
+e) Make it return the average ratings unsorted./ Make it return the total rating for each agent without the average
+Middleware Router
+a) We want to implement a middleware router for our web service, which based on the path returns different strings
+Our interface for the router looks something like:
+Interface Router {
+Fun addRoute(path: String, result: String) : Unit;
+Fun callRoute(path:String) :String;
+}
+
+Usage:
+Router.addRoute(“/bar” , “result)
+Router.callRoute(“/bar”) -> “result”
+
+Scale Up 1 – Wildcards using ordered checking
+Scale Up 2 – PathParams
+
+Game of Snakes
+Remember the old phone game of snake? The snake can move up, down, left or right in a 2Dimensional board of arbitrary size.
+Lets try to pmplement the bae logic of this game
+Rules:
+• Every time moveSnake() is called, the snake moves up, down, left or right
+• The snake’s initial size is 3 and grows by 1 every 5 moves
+• The game ends when the snake hits itself
+We can use the following as a starting point (pseudo-code):
+Interface SnakeGame {
+moveSnake(snakeDirection);
+isGameOver();
+}
+
+Proposed Changes
+Change#1
+Make scale-up 2 optional
+Remove scale-up 2 completely
+Change#2
+Add new optional scale up: snake grows when it eats food rather than every 5moves. Food is dropped at a random position on the board.
+
+Cost Explorer
+Imagine you are working on payments team at Atlassian. A customer subscribes to Jira and is interested in exploring how much it ‘ill cost them to keep using the product for the rest of the year
+Your task is to develop a COstExplorer that calculates the total cost a customer has to pay in a unit year . This means that at any day of the year they should be able to get a provisional report giving monthly/yearly cost estimated.
+CostExplorer should be able to provide a report of –
+
+Monthly cost (Generate a bill for each month, including bill amount for future months for the unit year)
+Yearly cost estimated(for the unit year)
+Level 0 : Multiple Plans for a Product
+
+System Design Question Bank
+Question 1 - Tagging
+Atlassian has a number of different products, each containing different types of content. As an example, let’s look at three of our products:
+
+Jira – Issues
+Confluence – Pages
+Bitbucket – Pull requests
+We want to build a system that allows users to tag content from different products, and then to view content by tags. A goal of this system is that it should be built on a product-agnostic way, so that we could add new products in the future without a large amount of work.
+There are three key experiences that we want to build here:
+
+As a user, I can add, remove and update tags on content
+As a user, I can click on a tag and see all content that has been associated with that tag
+As a user, I can see a dashboard of popular tags
+Imagine that you are on a team that needs to design and build the system to power this experience.
+
+Steps
+Part 1: API Design
+Part 2: Data modeling
+Part 3: Scaling up the popular tags API
+Part 4: Scaling up remaining API’s
+Part 5: Introducing Permissions
+
+Question 2 – Scrapper
+Design a service which receives as input a list of URLs ,scrapes those URLs for links to other pages and references to images(i.e., the src component of img tags), then returns a mapping of page URLs to a list of image URLs.
+Your service does not need to download and store the images
+Your service should follow links to other pages from the original submitted pages, and return the images on those 2/3/nth level pages as if they were on the first level page.
+
+The API contract is defined as :
+POST ing to /jobs with a body of a JSON array of URLs to start scraping from(e.g [“https:/google.com” ,https://www.statuspage.io]) should return a job identifier of some kind
+GET ing/jobs/:job_id/status with the returned job identifier should return a JSON object of the format of {“completed”:x, “in_progress”: y} where x is the number of original URLs which have been completely crawled and y is the number of original URLs which are still being crawled.
+GET ing /jobs/:job_id/results with the returned job identifier should return a JSON object returning a mapping of original URL to all reachable images from that original URL, in the format of
+{
+“https:/google/com”:{
+https://google.com/images/logo_sm_2.gif,
+https://google.com/images/warning.gif
+],
+https://www/statuspage.io: [
+https://statuspage.io/logo.png,
+https://statuspage.io/other-logo.png
+]
+}
+Steps
+Part 1: Introduction
+Part 2: Requirement Gathering
+Part 3: Architecture Diagram
+Part 4: Data Model
+Part 5: Scaling Up
+Question 3 – Hierarchical Data Storage System
+Design a system to store and retrieve a hierarchica odel which can be store any data with the following characteristics
+All nodes are under a root node, the root node doesn’t have any parent
+There can be multiple root nodes
+Each node can have multiple child nodes
+We need to design the following functionality into the system
+Add child node to any node
+Get all the children of a node, along with an indicator to show if each child node have further children or not, lets call this the TERMINAL node indicator
+You do NOT have to worry about what is exactly stored in the nodes, they can represent any data like confluence pages hierarchy or file system in operating systems or employee storage systems in organizations with manager-employee relationships or a heterogeneous systems that can store multiple types of nodes.
+Part 1: API Design
+Part 2: Data Modelling
+Part 3 : Box Diagram
+Scale Up 1 : View ancestors
+Scale Up 2: Scale APIs
+Scale Up 3: Reorder Nodes
+ScaleUp 4: Permission Handling
+
+Question 4 – Design the confluence Popular Feed
+Design the popular feed on a content authoring platform such as Confluence
+Steps
+Part 1 – Systems API
+Part 2 – Data Modelling
+Part 3 – High level architecture Design
+Part 4 – Level ups
+
+Question 5 – Color Picker
+Design a web application that allows me to pick my favourite color and save it. Scope the design to something that could be accomplished in a day.
+Part 1 – Introduction
+Part 2 – Web application design - Can ask about devops, tools, deployment platform, test automation
+Part 3 – Share with other users – How to handle “share with” feature when there are millions of users
+Part 4- Scaling Up – caching, CDNs
+Part 5 – Latency – DB replication, load balancing. Regiona affinity, what other types of replication
+
+Values and manegerial Round
+Open Company, No Bulllshit
+
+Tell me about a time your first impression of a person or situation was incorrecr
+Tell me about a time you had a different point of view about how to solve a problem with someone on your team
+Tell me about a time you had to give someone constructive feedback
+Tell me about a time you had to tell a manager or product owner that your work wouldn’t ship on time
+Tell me about a business situation where you weren’t able to be completely honest.
+Give me an example of a time where you received criticism from someone else
+Describe a time where you needed to make an unpopular decision
+Tell me about a time when you screwed something up at work.
+Build with Heart and Balance
+
+Tell me about a time that you had to balance competing business team, or project priorities
+Describe a project or a specific job where passion was the driving force behind your efforts
+Tell me about a time when you built something from beginning to end
+Give me an example of a time where you have pushed to understand why someone in your company or team made a decision
+Tell me about a time when you had to make a decision without all the information you needed
+Tell me about a time when the scope changed unexpectedly mid-way through a project
+Tell me about a time where you had to stop working on a project before it as completed
+Tell me about a time where you overcommitted yourself or your team to a deliverable
+Don’t f**k the customers
+
+Tell me about a time when you had to make a tradeoff that involved potentially causing pain for a user or customer
+Tell me about a time where you have shipped a bug/mistake to a customer or stakeholder
+Tell me about a time when you have gone above and beyond to make a customer or stakeholder experience great
+Tell me about a time you have had a challenging situation with a stakeholder
+Give me an example of a time where you had to change a deadline to ensure the deliverable met the customer/stakeholder needs.
+Tell me about a time when your team messed something up for a customer/stakeholder
+Provide an example of where you have made a decision that had an adverse effect on a customer
+Tell me about a time when you advocated for the customer,despite opposition
+Play, as a Team
+
+Describe a situation in which you had to arrive at a compromise with someone to move a project forward
+Tell me about a time, you were working on a project where your co-collaborator were holding back the process
+Tell me about the most effective team you’ve ever worked with
+Tell me about a time you helped someone else improve
+Tell me about a time that a team you managed was struggling to accomplish a goal
+Tell me about a time that an approach you fought to have adopted wasn’t
+Give me an example of when you drove efforts to motivate a team through difficult times
+Give an example of where you had to put your own needs aside and support a decision that was right for the greater team
+Be the change you seek
+
+Share an example of a time when you were able to turn around the performance of an individual or team
+Tell me about a time that you supported your team/ a teammate to manage a major change
+Tell me about a situation where you were given a project or goal that was completel new to you
+Tell me about a time you drove a chnge that was ultimately rejected
+Tell me about a time you’ve had to deal with vague requirements
+Tell me about a time it was very challenging for you to convince others to make a change
+Give me an example of a time when you initiated change to solve a problem you had identified
+Tell me about a time where you have asked for feedback, and how you changed yourself based on that feedback

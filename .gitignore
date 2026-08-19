@@ -2,11 +2,20 @@
 node_modules/
 dist/
 
+# Compiled C/C++ Executables & Object files
+a.out
+*.out
+*.o
+Executable
+0.5
+output.txt
+
 # Compiled Java class files
 *.class
 
 # Compiled Python bytecode
 *.py[cod]
+__pycache__/
 
 # Log files
 *.log
@@ -17,8 +26,9 @@ dist/
 # Maven
 target/
 
-# JetBrains IDE
+# JetBrains IDE & VSCode
 .idea/
+.vscode/
 
 # Unit test reports
 TEST*.xml
@@ -51,9 +61,4 @@ bin/
 
 # Test binary, build with `go test -c`
 *.test
-
-# Output of the go coverage tool, specifically when used with LiteIDE
-*.out
-
-# Project-local glide cache, RE: https://github.com/Masterminds/glide/issues/736
 .glide/

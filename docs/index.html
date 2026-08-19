@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Problem Solving Directory | Competitive Programming & System Design Catalog</title>
+  <meta name="description" content="Curated repository of 1,450+ solved competitive programming problems, algorithms, data structures, and system design notes. Minimalist tdd.cat inspired layout.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,600;1,6..72,400&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="page-container">
+    <!-- MASTHEAD HEADER (tdd.cat inspired) -->
+    <header class="masthead">
+      <div class="masthead-top">
+        <div class="masthead-meta-left">
+          <a href="#" class="brand-link">tdd.cat style index</a>
+          <span class="sep">•</span>
+          <span id="current-date">Wednesday, Aug 19, 2026</span>
+        </div>
+        <div class="masthead-meta-right">
+          <span class="edition-badge" id="total-badge">1,456 Problems</span>
+          <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle Theme">
+            <span class="sun-icon">☀️ Light</span>
+            <span class="moon-icon">🌙 Dark</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="masthead-title-container">
+        <pre class="ascii-cat cat-left">
+  /\_/\
+ (=^.^=)
+ (")_(")
+        </pre>
+        
+        <div class="masthead-center">
+          <h1 class="masthead-title">THE CODE INDEX</h1>
+          <p class="masthead-tagline">Curated Competitive Programming Solutions, Data Structures & System Designs</p>
+        </div>
+
+        <pre class="ascii-cat cat-right">
+  /\_/\
+ (=^.^=)
+ (")_(")
+        </pre>
+      </div>
+
+      <div class="masthead-rule"></div>
+
+      <!-- STATS DASHBOARD -->
+      <div class="stats-bar" id="stats-bar">
+        <div class="stat-pill" data-stat="all">
+          <span class="stat-value" id="stat-total">1,456</span>
+          <span class="stat-label">Total Solved</span>
+        </div>
+        <div class="stat-pill" data-stat="platforms">
+          <span class="stat-value" id="stat-platforms">15+</span>
+          <span class="stat-label">Platforms</span>
+        </div>
+        <div class="stat-pill" data-stat="concepts">
+          <span class="stat-value" id="stat-concepts">42</span>
+          <span class="stat-label">Algorithms & DS</span>
+        </div>
+        <div class="stat-pill" data-stat="sysdesign">
+          <span class="stat-value" id="stat-sysdesign">38</span>
+          <span class="stat-label">System Designs</span>
+        </div>
+      </div>
+
+      <!-- CONTROLS & FILTER BAR -->
+      <div class="filter-section">
+        <!-- Search bar with keyboard shortcut hint -->
+        <div class="search-box">
+          <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+          <input type="text" id="search-input" placeholder="Search problems by name, concept tag, platform, or language... (Press '/' to focus)" autocomplete="off">
+          <kbd class="search-kbd">/</kbd>
+          <button id="clear-search" class="clear-btn" hidden>&times;</button>
+        </div>
+
+        <!-- Filter Groups -->
+        <div class="filter-groups">
+          <!-- Platform Filter -->
+          <div class="filter-group">
+            <span class="filter-group-label">Platform:</span>
+            <div class="filter-pills" id="platform-filters">
+              <button class="filter-btn active" data-filter-type="platform" data-value="ALL">All</button>
+            </div>
+          </div>
+
+          <!-- Concept Filter -->
+          <div class="filter-group">
+            <span class="filter-group-label">Algorithms & DS:</span>
+            <div class="filter-pills" id="concept-filters">
+              <button class="filter-btn active" data-filter-type="concept" data-value="ALL">All</button>
+            </div>
+          </div>
+
+          <!-- Language Filter -->
+          <div class="filter-group">
+            <span class="filter-group-label">Language:</span>
+            <div class="filter-pills" id="lang-filters">
+              <button class="filter-btn active" data-filter-type="lang" data-value="ALL">All</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="main-content">
+      <div class="results-header">
+        <div class="results-meta">
+          <span id="results-count">Showing 1,456 problems</span>
+          <div class="active-filters-tags" id="active-filters-bar"></div>
+        </div>
+
+        <!-- LAYOUT VIEW SWITCHER -->
+        <div class="layout-switcher">
+          <button class="layout-btn active" data-view="editorial" title="Editorial List View">
+            📄 Editorial List
+          </button>
+          <button class="layout-btn" data-view="grid" title="Cards Grid View">
+            🎴 Minimal Cards
+          </button>
+          <button class="layout-btn" data-view="table" title="Dense Table View">
+            📊 Compact Table
+          </button>
+        </div>
+      </div>
+
+      <!-- PROBLEMS CONTAINER (Editorial List, Cards, or Table) -->
+      <div class="problems-view view-editorial" id="problems-container">
+        <!-- Dynamic content rendered here -->
+      </div>
+
+      <div class="empty-state" id="empty-state" hidden>
+        <p>No matching solutions found. Try clearing your filters or search terms.</p>
+        <button id="reset-all-filters" class="reset-btn">Reset All Filters</button>
+      </div>
+
+      <!-- LOAD MORE / PAGINATION -->
+      <div class="pagination-container" id="pagination-container">
+        <button id="load-more-btn" class="load-more-btn">Load More Problems</button>
+      </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="site-footer">
+      <div class="footer-content">
+        <p>© 2026 Problem Solving Directory • Hosted on GitHub Pages</p>
+        <p class="footer-sub">Inspired by <a href="https://tdd.cat/" target="_blank" rel="noopener">tdd.cat</a> minimalism & depth</p>
+      </div>
+    </footer>
+  </div>
+
+  <!-- CODE VIEWER DRAWER / MODAL -->
+  <div class="code-modal-backdrop" id="code-modal-backdrop" hidden>
+    <div class="code-modal">
+      <div class="modal-header">
+        <div class="modal-title-group">
+          <h2 id="modal-title">Problem Title</h2>
+          <div class="modal-badges" id="modal-badges"></div>
+        </div>
+        <button class="close-modal-btn" id="close-modal-btn" aria-label="Close Modal">&times;</button>
+      </div>
+      <div class="modal-meta-bar">
+        <span id="modal-filepath">filepath.cpp</span>
+        <div class="modal-actions">
+          <a id="modal-github-link" class="modal-link-btn" target="_blank" rel="noopener">
+            📁 View on GitHub
+          </a>
+          <a id="modal-problem-link" class="modal-link-btn primary" target="_blank" rel="noopener">
+            🔗 Open Original Problem
+          </a>
+          <button id="copy-code-btn" class="copy-btn">📋 Copy Code</button>
+        </div>
+      </div>
+      <div class="modal-body">
+        <pre><code id="modal-code-content"></code></pre>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
